@@ -1,0 +1,106 @@
+.wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px 0; }
+
+.pantalla {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+.pantallaBar {
+  width: 70%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  border-radius: 2px;
+  box-shadow: 0 0 20px var(--accent);
+}
+
+.leyenda {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.leyendaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.dot { width: 12px; height: 12px; border-radius: 3px; }
+.dotDisp { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+.dotSel { background: var(--accent); }
+.dotOcup { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+
+.grid { display: flex; flex-direction: column; gap: 6px; width: 100%; overflow-x: auto; padding-bottom: 8px; }
+
+.row { display: flex; align-items: center; gap: 8px; }
+
+.filaLabel {
+  width: 20px;
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.seats { display: flex; gap: 5px; flex-wrap: nowrap; }
+
+.seat {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px 5px 3px 3px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+.seatNum { font-size: 0.6rem; font-weight: 600; pointer-events: none; }
+
+.disponible {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.disponible:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.15);
+}
+
+.seleccionado {
+  background: var(--accent);
+  color: #000;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 2px 10px rgba(232,184,75,0.4);
+}
+.seleccionado:hover { transform: scale(1.05); }
+
+.ocupado {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border: 1px solid rgba(255,255,255,0.04);
+  opacity: 0.4;
+}
+
+@media (max-width: 600px) {
+  .seat { width: 22px; height: 22px; border-radius: 4px 4px 2px 2px; }
+  .seatNum { font-size: 0.5rem; }
+  .seats { gap: 3px; }
+}

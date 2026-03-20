@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { listar, listarTodas, obtener, crear, actualizar, eliminar } from '../controllers/peliculasController.js';
+import { verificarToken, soloAdmin } from '../middleware/auth.js';
+const router = Router();
+router.get('/', listar);
+router.get('/todas', verificarToken, soloAdmin, listarTodas);
+router.get('/:id', obtener);
+router.post('/', verificarToken, soloAdmin, crear);
+router.put('/:id', verificarToken, soloAdmin, actualizar);
+router.delete('/:id', verificarToken, soloAdmin, eliminar);
+export default router;

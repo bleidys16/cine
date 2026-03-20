@@ -1,0 +1,26 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import authRoutes from './routes/auth.js';
+import peliculasRoutes from './routes/peliculas.js';
+import funcionesRoutes from './routes/funciones.js';
+import tiquetesRoutes from './routes/tiquetes.js';
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/peliculas', peliculasRoutes);
+app.use('/api/funciones', funcionesRoutes);
+app.use('/api/tiquetes', tiquetesRoutes);
+
+app.get('/api/health', (_, res) => res.json({ estado: 'OK', timestamp: new Date() }));
+
+app.listen(PORT, () => {
+  console.log(`🎬 Servidor CineApp corriendo en puerto ${PORT}`);
+});

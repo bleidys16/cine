@@ -1,0 +1,22 @@
+.wrap { display: flex; flex-direction: column; gap: 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; }
+.header h2 { font-size: 1.3rem; }
+.formCard { padding: 0; }
+.formCard:hover { transform: none; }
+.formHeader { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+.formHeader h3 { font-size: 1rem; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+.closeBtn { background: none; border: none; color: var(--text-muted); display: flex; transition: color 0.2s; }
+.closeBtn:hover { color: var(--text-primary); }
+.form { padding: 24px; }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+.formActions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+.tableCard { padding: 0; overflow-x: auto; }
+.tableCard:hover { transform: none; }
+.table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.table th { padding: 12px 20px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.table td { padding: 14px 20px; font-size: 0.88rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.pelInfo { display: flex; align-items: center; gap: 10px; }
+.thumb { width: 36px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
+@media (max-width: 600px) { .formGrid { grid-template-columns: 1fr; } }

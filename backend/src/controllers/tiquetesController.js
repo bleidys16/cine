@@ -1,6 +1,6 @@
 import pool from '../db/connection.js';
 import { nanoid } from 'nanoid';
-import { enviarTiquete, notificarAdminVenta } from '../services/emailService.js';
+import { enviarTiquete } from '../services/emailService.js';
 
 export const comprar = async (req, res) => {
   const { funcion_id, asientos_ids } = req.body;
@@ -57,7 +57,7 @@ export const comprar = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Obtener detalles completos para respuesta y correos
+    // Obtener detalles completos
     const { rows: detalles } = await pool.query(`
       SELECT a.fila, a.columna, a.numero, dt.precio_unitario
       FROM detalle_tiquete dt
@@ -73,15 +73,18 @@ export const comprar = async (req, res) => {
 
     const tiqueteCompleto = { ...tiquete, asientos: detalles, funcion: funcDetalle[0] };
 
-    // Enviar correos si el usuario está logueado (no bloqueante)
+    // Enviar correo con el tiquete si hay usuario logueado
     if (usuario_id) {
       const { rows: userRows } = await pool.query(
-        'SELECT nombre, email FROM usuarios WHERE id = $1', [usuario_id]
+        'SELECT nombre, email FROM usuarios WHERE id = $1',
+        [usuario_id]
       );
       if (userRows.length > 0) {
-        const { nombre, email } = userRows[0];
-        enviarTiquete({ email, nombre, tiquete: tiqueteCompleto });
-        notificarAdminVenta({ tiquete: tiqueteCompleto, nombreCliente: nombre });
+        enviarTiquete({
+          email: userRows[0].email,
+          nombre: userRows[0].nombre,
+          tiquete: tiqueteCompleto
+        });
       }
     }
 
@@ -111,15 +114,12 @@ export const validar = async (req, res) => {
       return res.status(404).json({ valido: false, estado: 'invalido', mensaje: 'Código no encontrado' });
 
     const tiquete = rows[0];
-
     if (tiquete.estado === 'usado')
       return res.json({ valido: false, estado: 'usado', mensaje: 'Tiquete ya fue utilizado', tiquete });
-
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
 
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
-
     res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al validar tiquete', error: err.message });

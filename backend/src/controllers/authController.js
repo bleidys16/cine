@@ -20,8 +20,8 @@ export const registrar = async (req, res) => {
     );
     const token = jwt.sign({ id: rows[0].id, rol: rows[0].rol }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    // Enviar correo de bienvenida (no bloqueante)
-    enviarBienvenida(rows[0].nombre, rows[0].email);
+    // Enviar correo de bienvenida (sin bloquear la respuesta)
+    enviarBienvenida({ nombre, email });
 
     res.status(201).json({ usuario: rows[0], token });
   } catch (err) {

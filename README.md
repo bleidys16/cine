@@ -1,4 +1,4 @@
-# 🎬 CineApp — Sistema Web de Gestión de Cine
+# CineApp — Sistema Web de Gestión de Cine
 
 Sistema web completo para gestión de cartelera, venta de tiquetes y control de acceso a una sala de cine.
 
@@ -6,7 +6,7 @@ Sistema web completo para gestión de cartelera, venta de tiquetes y control de 
 
 ---
 
-## 🧰 Tecnologías utilizadas
+## Tecnologías utilizadas
 
 | Capa | Tecnología |
 |------|-----------|
@@ -21,7 +21,7 @@ Sistema web completo para gestión de cartelera, venta de tiquetes y control de 
 
 ---
 
-## 🗂️ Estructura del proyecto
+## Estructura del proyecto
 
 ```
 cine/
@@ -44,7 +44,7 @@ cine/
 
 ---
 
-## ⚙️ Instalación y configuración
+## Instalación y configuración
 
 ### 1. Clonar el repositorio
 
@@ -102,7 +102,7 @@ La app corre en `http://localhost:5173`
 
 ---
 
-## 🔐 Credenciales de prueba
+## Credenciales de prueba
 
 | Rol | Email | Contraseña |
 |-----|-------|-----------|
@@ -112,7 +112,7 @@ La app corre en `http://localhost:5173`
 
 ---
 
-## 📡 Endpoints de la API
+## Endpoints de la API
 
 ### Autenticación
 | Método | Ruta | Descripción |
@@ -149,7 +149,7 @@ La app corre en `http://localhost:5173`
 
 ---
 
-## 🗃️ Modelo de base de datos
+## Modelo de base de datos
 
 ```
 usuarios ──── tiquetes ──── detalle_tiquete ──── asientos
@@ -163,31 +163,33 @@ usuarios ──── tiquetes ──── detalle_tiquete ──── asiento
 
 ---
 
-## 🎭 Funcionalidades principales
+## Funcionalidades principales
 
 - **Cartelera pública** con búsqueda y filtro por género
 - **Detalle de película** con funciones disponibles y asientos libres
 - **Mapa visual de 150 asientos** (10 filas × 15 columnas) con estados en tiempo real
 - **Compra con transacción atómica** — evita doble venta simultánea
-- **Generación de código único** por tiquete
-- **Validación de tiquetes** por código (válido / usado / inválido)
+- **Generación de código QR único** por tiquete
+- **Validación de tiquetes** por código o escáner QR (válido / usado / inválido)
 - **Panel admin** con dashboard, CRUD de películas y funciones
 - **Autenticación JWT** con roles (admin / cliente)
 
 ---
 
-## 👥 Equipo
+## Equipo
 
 | Nombre | Rol |
 |--------|-----|
-| Bleidys | Desarrollo Full Stack |
+| Sara Cervantes | Líder |
+| Bleidys Larios | Desarrollo Frontend |
+| Camilo Caballero | Desarrollo Backend |
+| Juan Esper | QA / Documentador |
 
 ---
 
-## 📋 Criterios de evaluación cubiertos
+## Despliegue
 
-- ✅ Funcionamiento del sistema (30%)
-- ✅ Estructura y calidad del código (20%)
-- ✅ Diseño de interfaz UX/UI (15%)
-- ✅ Implementación de base de datos (15%)
-- ✅ Documentación (10%)
+| Servicio | URL |
+|----------|-----|
+| Frontend | https://cine-psi-lilac.vercel.app |
+| Backend | https://cine-41x4.onrender.com |

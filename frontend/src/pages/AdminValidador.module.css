@@ -2,20 +2,52 @@
 .header h2 { font-size: 1.3rem; margin-bottom: 4px; }
 .header p { font-size: 0.88rem; color: var(--text-secondary); }
 .center { display: flex; justify-content: center; }
-.scanner { max-width: 480px; width: 100%; padding: 36px; text-align: center; }
+.scanner { max-width: 480px; width: 100%; padding: 0; overflow: hidden; }
 .scanner:hover { transform: none; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); }
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+.tabActive { color: var(--accent) !important; background: var(--accent-glow) !important; font-weight: 600; }
+
+/* Cámara */
+.camaraWrap { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.qrReader { width: 100% !important; border-radius: 12px; overflow: hidden; }
+.qrReader video { border-radius: 12px; }
+.camaraLoading { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.85rem; }
+.camaraHint { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); text-align: center; }
+
+/* Manual */
 .scanIcon {
   width: 72px; height: 72px;
   background: var(--accent-glow);
   border: 1px solid var(--border-accent);
   border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 24px;
+  margin: 32px auto 20px;
 }
-.form { width: 100%; }
+.form { width: 100%; padding: 0 24px 24px; }
 .inputRow { display: flex; gap: 10px; }
 .codigoInput { flex: 1; }
-.resultado { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+
+/* Resultado */
+.resultado { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 0 24px 24px; }
 .resultIcon { margin-top: 8px; }
 .tiqueteInfo {
   width: 100%;

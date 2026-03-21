@@ -1,3 +1,4 @@
+import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { TrendingUp, Users, Film, Ticket, BarChart2, Percent } from 'lucide-react';
 import api from '../services/api';
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
             <tbody>
               {data?.ventas_recientes?.map((v, i) => (
                 <tr key={i}>
-                  <td>{new Date(v.dia).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</td>
+                  <td>{formatFecha(v.dia, { month: 'short' })}</td>
                   <td><span className="badge badge-gold">{v.cantidad}</span></td>
                   <td className={styles.money}>${Number(v.total).toLocaleString('es-CO')}</td>
                 </tr>
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
               <div key={i} className={styles.funcItem}>
                 <div className={styles.funcInfo}>
                   <span className={styles.funcTitulo}>{f.titulo}</span>
-                  <span className={styles.funcFecha}>{new Date(f.fecha + 'T00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })} — {f.hora?.slice(0,5)}</span>
+                  <span className={styles.funcFecha}>{formatFecha(f.fecha, { month: 'short' })} — {f.hora?.slice(0,5)}</span>
                 </div>
                 <div className={styles.funcBar}>
                   <div className={styles.barTrack}>

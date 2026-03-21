@@ -1,3 +1,4 @@
+import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { Plus, Pencil, X, Check, Calendar, Clock } from 'lucide-react';
 import api from '../services/api';
@@ -139,7 +140,7 @@ export default function AdminFunciones() {
                   <td>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Calendar size={13} style={{ color: 'var(--text-muted)' }} />
-                      {new Date(f.fecha + 'T00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {formatFecha(f.fecha, { month: 'short' })}
                     </span>
                   </td>
                   <td>

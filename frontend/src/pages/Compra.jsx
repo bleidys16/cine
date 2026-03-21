@@ -1,3 +1,4 @@
+import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Ticket, CheckCircle, ArrowLeft, Download } from 'lucide-react';
@@ -86,7 +87,7 @@ export default function Compra() {
               <div className={`card ${styles.resumenCard}`}>
                 <h3 className={styles.resumenTitle}>{funcion.titulo}</h3>
                 <div className={styles.resumenMeta}>
-                  <div className={styles.resumenItem}><Calendar size={14} /><span>{new Date(funcion.fecha + 'T00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}</span></div>
+                  <div className={styles.resumenItem}><Calendar size={14} /><span>{formatFecha(funcion.fecha)}</span></div>
                   <div className={styles.resumenItem}><Clock size={14} /><span>{funcion.hora?.slice(0, 5)}</span></div>
                   <div className={styles.resumenItem}><MapPin size={14} /><span>{funcion.sala}</span></div>
                 </div>
@@ -183,7 +184,7 @@ function TiqueteConfirmado({ tiquete, navigate }) {
 
           <div className={styles.tiqueteInfo}>
             <div className={styles.tiqueteRow}><span>Película</span><strong>{tiquete.funcion?.titulo}</strong></div>
-            <div className={styles.tiqueteRow}><span>Fecha</span><strong>{new Date(tiquete.funcion?.fecha + 'T00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}</strong></div>
+            <div className={styles.tiqueteRow}><span>Fecha</span><strong>{formatFecha(tiquete.funcion?.fecha)}</strong></div>
             <div className={styles.tiqueteRow}><span>Hora</span><strong>{tiquete.funcion?.hora?.slice(0, 5)}</strong></div>
             <div className={styles.tiqueteRow}><span>Sala</span><strong>{tiquete.funcion?.sala}</strong></div>
             <div className={styles.tiqueteRow}><span>Asientos</span><strong>{tiquete.asientos?.map(a => `${a.fila}${a.columna}`).join(', ')}</strong></div>

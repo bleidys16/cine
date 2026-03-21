@@ -1,3 +1,4 @@
+import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, Calendar, MapPin, ChevronRight, ArrowLeft, Users } from 'lucide-react';
@@ -85,7 +86,7 @@ export default function DetallePelicula() {
                   <div className={styles.funcionInfo}>
                     <div className={styles.funcionFecha}>
                       <Calendar size={14} />
-                      <span>{new Date(f.fecha + 'T00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                      <span>{formatFecha(f.fecha, { weekday: 'long' })}</span>
                     </div>
                     <div className={styles.funcionHora}>{f.hora?.slice(0, 5)}</div>
                     <div className={styles.funcionMeta}>

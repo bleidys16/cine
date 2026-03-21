@@ -1,3 +1,4 @@
+import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { Ticket, Calendar, Clock, MapPin, Hash, ChevronDown, ChevronUp } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -51,7 +52,7 @@ export default function MisTiquetes() {
                       <h3>{t.titulo}</h3>
                     </div>
                     <div className={styles.tiqueteMeta}>
-                      <span><Calendar size={13} /> {new Date(t.fecha + 'T00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      <span><Calendar size={13} /> {formatFecha(t.fecha)}</span>
                       <span><Clock size={13} /> {t.hora?.slice(0, 5)}</span>
                       <span><MapPin size={13} /> {t.sala}</span>
                     </div>

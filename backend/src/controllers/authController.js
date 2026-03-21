@@ -1,6 +1,7 @@
 import pool from '../db/connection.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { enviarBienvenida } from '../services/emailService.js';
 
 export const registrar = async (req, res) => {
   const { nombre, email, contrasena } = req.body;
@@ -18,6 +19,10 @@ export const registrar = async (req, res) => {
       [nombre, email, hash, 'cliente']
     );
     const token = jwt.sign({ id: rows[0].id, rol: rows[0].rol }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Enviar correo de bienvenida (no bloqueante)
+    enviarBienvenida(rows[0].nombre, rows[0].email);
+
     res.status(201).json({ usuario: rows[0], token });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });

@@ -1,5 +1,6 @@
 import pool from '../db/connection.js';
 import { nanoid } from 'nanoid';
+import { enviarTiquete, notificarAdminVenta } from '../services/emailService.js';
 
 export const comprar = async (req, res) => {
   const { funcion_id, asientos_ids } = req.body;
@@ -12,7 +13,6 @@ export const comprar = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Obtener precio de la función
     const { rows: funcRows } = await client.query(
       "SELECT precio FROM funciones WHERE id = $1 AND estado = 'disponible'",
       [funcion_id]
@@ -22,7 +22,6 @@ export const comprar = async (req, res) => {
       return res.status(404).json({ mensaje: 'Función no disponible' });
     }
 
-    // Verificar que los asientos estén libres (lock)
     const { rows: ocupados } = await client.query(
       'SELECT asiento_id FROM asientos_funcion WHERE funcion_id = $1 AND asiento_id = ANY($2::int[])',
       [funcion_id, asientos_ids]
@@ -39,14 +38,12 @@ export const comprar = async (req, res) => {
     const total = precio * asientos_ids.length;
     const codigo = nanoid(10).toUpperCase();
 
-    // Crear tiquete
     const { rows: tiqRows } = await client.query(
       'INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total) VALUES ($1,$2,$3,$4) RETURNING *',
       [codigo, usuario_id, funcion_id, total]
     );
     const tiquete = tiqRows[0];
 
-    // Insertar detalles y marcar asientos
     for (const asiento_id of asientos_ids) {
       await client.query(
         'INSERT INTO detalle_tiquete (tiquete_id, asiento_id, precio_unitario) VALUES ($1,$2,$3)',
@@ -60,7 +57,7 @@ export const comprar = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Retornar tiquete con detalles
+    // Obtener detalles completos para respuesta y correos
     const { rows: detalles } = await pool.query(`
       SELECT a.fila, a.columna, a.numero, dt.precio_unitario
       FROM detalle_tiquete dt
@@ -74,9 +71,21 @@ export const comprar = async (req, res) => {
       WHERE f.id = $1
     `, [funcion_id]);
 
-    res.status(201).json({
-      tiquete: { ...tiquete, asientos: detalles, funcion: funcDetalle[0] }
-    });
+    const tiqueteCompleto = { ...tiquete, asientos: detalles, funcion: funcDetalle[0] };
+
+    // Enviar correos si el usuario está logueado (no bloqueante)
+    if (usuario_id) {
+      const { rows: userRows } = await pool.query(
+        'SELECT nombre, email FROM usuarios WHERE id = $1', [usuario_id]
+      );
+      if (userRows.length > 0) {
+        const { nombre, email } = userRows[0];
+        enviarTiquete({ email, nombre, tiquete: tiqueteCompleto });
+        notificarAdminVenta({ tiquete: tiqueteCompleto, nombreCliente: nombre });
+      }
+    }
+
+    res.status(201).json({ tiquete: tiqueteCompleto });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ mensaje: 'Error al procesar compra', error: err.message });
@@ -109,7 +118,6 @@ export const validar = async (req, res) => {
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
 
-    // Marcar como usado
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
 
     res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });

@@ -1,0 +1,60 @@
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 6px;
+  overflow: hidden;
+}
+
+/* Cada columna se desplaza verticalmente a velocidades distintas */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: scrollUp 40s linear infinite;
+  will-change: transform;
+}
+
+/* Columnas pares bajan, impares suben — efecto parallax natural */
+.col:nth-child(even) {
+  animation: scrollDown 45s linear infinite;
+}
+
+.colOffset {
+  margin-top: -80px;
+}
+
+@keyframes scrollUp {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes scrollDown {
+  0%   { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+/* Pausar animación si el usuario prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .col { animation: none; }
+}
+
+.posterWrap {
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  aspect-ratio: 2/3;
+  background: #1a1a1a;
+}
+
+.poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: none;
+  /* Ligero desenfoque para que no compita con el texto */
+  filter: brightness(0.55) saturate(0.8);
+}

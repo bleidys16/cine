@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Search } from 'lucide-react';
 import api from '../services/api';
 import styles from './AdminPeliculas.module.css';
 
@@ -15,32 +15,41 @@ export default function AdminPeliculas() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
+  const [tmdbQuery, setTmdbQuery] = useState('');
+  const [tmdbResults, setTmdbResults] = useState([]);
+  const [buscandoTmdb, setBuscandoTmdb] = useState(false);
 
   const cargar = () => {
     setCargando(true);
-    api.get('/peliculas/todas')
-      .then(r => setPeliculas(r.data))
-      .catch(console.error)
-      .finally(() => setCargando(false));
+    api.get('/peliculas/todas').then(r => setPeliculas(r.data)).catch(console.error).finally(() => setCargando(false));
   };
 
   useEffect(() => { cargar(); }, []);
 
-  const handleEdit = (p) => {
-    setForm({ ...p });
-    setEditId(p.id);
-    setShowForm(true);
-    setError('');
+  const buscarTmdb = async () => {
+    if (!tmdbQuery.trim()) return;
+    setBuscandoTmdb(true);
+    try {
+      const { data } = await api.get(`/tmdb/buscar?query=${encodeURIComponent(tmdbQuery)}`);
+      setTmdbResults(data);
+    } catch { setError('Error buscando en TMDB'); }
+    finally { setBuscandoTmdb(false); }
   };
 
-  const handleNew = () => {
-    setForm(EMPTY);
-    setEditId(null);
-    setShowForm(true);
-    setError('');
+  const seleccionarTmdb = (movie) => {
+    setForm(prev => ({
+      ...prev,
+      titulo: movie.titulo,
+      descripcion: movie.descripcion || prev.descripcion,
+      imagen_url: movie.imagen_url || prev.imagen_url,
+    }));
+    setTmdbResults([]);
+    setTmdbQuery('');
   };
 
-  const handleCancel = () => { setShowForm(false); setError(''); };
+  const handleEdit = (p) => { setForm({ ...p }); setEditId(p.id); setShowForm(true); setError(''); setTmdbResults([]); };
+  const handleNew = () => { setForm(EMPTY); setEditId(null); setShowForm(true); setError(''); setTmdbResults([]); };
+  const handleCancel = () => { setShowForm(false); setError(''); setTmdbResults([]); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,17 +61,12 @@ export default function AdminPeliculas() {
       cargar();
     } catch (err) {
       setError(err.response?.data?.mensaje || 'Error al guardar');
-    } finally {
-      setGuardando(false);
-    }
+    } finally { setGuardando(false); }
   };
 
   const handleDelete = async (id) => {
     if (!confirm('¿Desactivar esta película?')) return;
-    try {
-      await api.delete(`/peliculas/${id}`);
-      cargar();
-    } catch { alert('Error al eliminar'); }
+    try { await api.delete(`/peliculas/${id}`); cargar(); } catch { alert('Error al eliminar'); }
   };
 
   return (
@@ -78,60 +82,100 @@ export default function AdminPeliculas() {
             <h3>{editId ? 'Editar película' : 'Nueva película'}</h3>
             <button className={styles.closeBtn} onClick={handleCancel}><X size={18} /></button>
           </div>
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.formGrid}>
-              <div className="form-group">
-                <label className="label">Título *</label>
-                <input className="input" value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} required />
+          <div className={styles.form}>
+            {/* Buscador TMDB */}
+            <div className={styles.tmdbSearch}>
+              <p className={styles.tmdbLabel}>🔍 Buscar en TMDB para autocompletar</p>
+              <div className={styles.tmdbRow}>
+                <input
+                  className="input"
+                  placeholder="Ej: Saltburn, Challengers..."
+                  value={tmdbQuery}
+                  onChange={e => setTmdbQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), buscarTmdb())}
+                />
+                <button className="btn btn-ghost" onClick={buscarTmdb} disabled={buscandoTmdb} type="button">
+                  {buscandoTmdb ? <div className="spinner" /> : <><Search size={15} /> Buscar</>}
+                </button>
               </div>
-              <div className="form-group">
-                <label className="label">Duración (min) *</label>
-                <input className="input" type="number" value={form.duracion} onChange={e => setForm({ ...form, duracion: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label className="label">Género</label>
-                <select className="input" value={form.genero} onChange={e => setForm({ ...form, genero: e.target.value })}>
-                  <option value="">Seleccionar...</option>
-                  {GENEROS.map(g => <option key={g}>{g}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="label">Clasificación</label>
-                <select className="input" value={form.clasificacion} onChange={e => setForm({ ...form, clasificacion: e.target.value })}>
-                  <option value="">Seleccionar...</option>
-                  {CLASIF.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="form-group" style={{ gridColumn: '1/-1' }}>
-                <label className="label">Descripción</label>
-                <textarea className="input" rows={3} style={{ resize: 'vertical' }} value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="label">URL Imagen</label>
-                <input className="input" value={form.imagen_url} onChange={e => setForm({ ...form, imagen_url: e.target.value })} placeholder="https://..." />
-              </div>
-              <div className="form-group">
-                <label className="label">URL Trailer</label>
-                <input className="input" value={form.trailer_url} onChange={e => setForm({ ...form, trailer_url: e.target.value })} placeholder="https://youtube.com/..." />
-              </div>
-              {editId && (
-                <div className="form-group">
-                  <label className="label">Estado</label>
-                  <select className="input" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
-                    <option value="activa">Activa</option>
-                    <option value="inactiva">Inactiva</option>
-                  </select>
+              {tmdbResults.length > 0 && (
+                <div className={styles.tmdbResults}>
+                  {tmdbResults.map(m => (
+                    <button key={m.id} className={styles.tmdbResult} onClick={() => seleccionarTmdb(m)} type="button">
+                      {m.imagen_url && <img src={m.imagen_url} alt="" className={styles.tmdbThumb} onError={e => e.target.style.display='none'} />}
+                      <div>
+                        <strong>{m.titulo}</strong>
+                        <span>{m.año}</span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-            {error && <p className="error-msg">{error}</p>}
-            <div className={styles.formActions}>
-              <button type="button" className="btn btn-ghost" onClick={handleCancel}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" disabled={guardando}>
-                {guardando ? <><div className="spinner" /> Guardando...</> : <><Check size={16} /> {editId ? 'Actualizar' : 'Crear película'}</>}
-              </button>
-            </div>
-          </form>
+
+            <hr className="divider" />
+
+            <form onSubmit={handleSubmit}>
+              <div className={styles.formGrid}>
+                <div className="form-group">
+                  <label className="label">Título *</label>
+                  <input className="input" value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label className="label">Duración (min) *</label>
+                  <input className="input" type="number" value={form.duracion} onChange={e => setForm({ ...form, duracion: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label className="label">Género</label>
+                  <select className="input" value={form.genero} onChange={e => setForm({ ...form, genero: e.target.value })}>
+                    <option value="">Seleccionar...</option>
+                    {GENEROS.map(g => <option key={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="label">Clasificación</label>
+                  <select className="input" value={form.clasificacion} onChange={e => setForm({ ...form, clasificacion: e.target.value })}>
+                    <option value="">Seleccionar...</option>
+                    {CLASIF.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="form-group" style={{ gridColumn: '1/-1' }}>
+                  <label className="label">Descripción</label>
+                  <textarea className="input" rows={3} style={{ resize: 'vertical' }} value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label className="label">URL Imagen</label>
+                  <input className="input" value={form.imagen_url} onChange={e => setForm({ ...form, imagen_url: e.target.value })} placeholder="https://..." />
+                </div>
+                <div className="form-group">
+                  <label className="label">URL Trailer</label>
+                  <input className="input" value={form.trailer_url} onChange={e => setForm({ ...form, trailer_url: e.target.value })} placeholder="https://youtube.com/..." />
+                </div>
+                {editId && (
+                  <div className="form-group">
+                    <label className="label">Estado</label>
+                    <select className="input" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
+                      <option value="activa">Activa</option>
+                      <option value="inactiva">Inactiva</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              {/* Preview imagen */}
+              {form.imagen_url && (
+                <div className={styles.imgPreview}>
+                  <img src={form.imagen_url} alt="Preview" onError={e => e.target.style.display='none'} />
+                </div>
+              )}
+              {error && <p className="error-msg">{error}</p>}
+              <div className={styles.formActions}>
+                <button type="button" className="btn btn-ghost" onClick={handleCancel}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" disabled={guardando}>
+                  {guardando ? <><div className="spinner" /> Guardando...</> : <><Check size={16} /> {editId ? 'Actualizar' : 'Crear película'}</>}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -148,7 +192,7 @@ export default function AdminPeliculas() {
                 <tr key={p.id}>
                   <td>
                     <div className={styles.pelInfo}>
-                      {p.imagen_url && <img src={p.imagen_url} alt="" className={styles.thumb} onError={e => e.target.style.display = 'none'} />}
+                      {p.imagen_url && <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/tmdb/poster/${p.imagen_url.split('/w500/')[1] || p.imagen_url.split('/w342/')[1]}`} alt="" className={styles.thumb} onError={e => e.target.style.display='none'} />}
                       <strong>{p.titulo}</strong>
                     </div>
                   </td>

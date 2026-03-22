@@ -23,3 +23,24 @@
 .thumb { width: 32px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
 
 @media (max-width: 600px) { .formGrid { grid-template-columns: 1fr; } }
+
+/* TMDB Search */
+.tmdbSearch { background: var(--bg-elevated); border-radius: var(--radius); padding: 16px; margin-bottom: 4px; }
+.tmdbLabel { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; }
+.tmdbRow { display: flex; gap: 8px; }
+.tmdbResults { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
+.tmdbResult {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius);
+  background: var(--bg-surface); border: 1px solid var(--border);
+  text-align: left; cursor: pointer; transition: all 0.15s;
+  font-family: inherit;
+}
+.tmdbResult:hover { border-color: var(--gold-border); background: var(--bg-hover); }
+.tmdbResult strong { display: block; font-size: 0.86rem; color: var(--text-primary); }
+.tmdbResult span { font-size: 0.76rem; color: var(--text-muted); }
+.tmdbThumb { width: 32px; height: 44px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+
+/* Image preview */
+.imgPreview { margin: 4px 0 16px; }
+.imgPreview img { height: 120px; border-radius: var(--radius); border: 1px solid var(--border); }

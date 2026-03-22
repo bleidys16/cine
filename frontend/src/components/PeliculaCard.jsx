@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Clock, ChevronRight } from 'lucide-react';
 import styles from './PeliculaCard.module.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 const GENERO_COLORS = {
   'Ciencia Ficción': '#6366f1',
   'Drama':           '#a855f7',
@@ -15,23 +17,22 @@ const GENERO_COLORS = {
   'Documental':      '#14b8a6',
 };
 
-// Usa el proxy de imágenes de OMDB (requiere solo el título)
-const getPosterUrl = (pelicula) => {
-  if (pelicula.imagen_url && pelicula.imagen_url.startsWith('https://image.tmdb.org')) {
-    // Convertir a proxy confiable
-    const path = pelicula.imagen_url.split('/p/')[1]; // ej: w342/abc123.jpg
-    const filename = path?.split('/')[1]; // ej: abc123.jpg
-    if (filename) return `https://image.tmdb.org/t/p/w500/${filename}`;
+// Si la URL es de TMDB, pasarla por el proxy del backend
+const getProxiedUrl = (url) => {
+  if (!url) return null;
+  if (url.includes('image.tmdb.org')) {
+    const path = url.split('/w500/')[1] || url.split('/w342/')[1];
+    if (path) return `${API}/tmdb/poster/${path}`;
   }
-  return pelicula.imagen_url || null;
+  return url;
 };
 
 const getFallback = (titulo) =>
-  `https://placehold.co/300x450/1a1a1a/c9a84c?text=${encodeURIComponent(titulo.slice(0, 12))}`;
+  `https://placehold.co/300x450/111111/c9a84c?text=${encodeURIComponent(titulo.slice(0, 14))}`;
 
 export default function PeliculaCard({ pelicula }) {
   const generoColor = GENERO_COLORS[pelicula.genero] || '#6b7280';
-  const src = getPosterUrl(pelicula) || getFallback(pelicula.titulo);
+  const src = getProxiedUrl(pelicula.imagen_url) || getFallback(pelicula.titulo);
 
   return (
     <div className={`card card-hover ${styles.card}`}>

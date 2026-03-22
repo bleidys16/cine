@@ -1,45 +1,41 @@
-.main { padding: 80px 0; }
-.header { margin-bottom: 40px; }
-.header h1 { font-size: 2.2rem; margin-bottom: 8px; }
-.header p { color: var(--text-secondary); }
-.empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: var(--text-muted); text-align: center; }
-.empty h3 { font-size: 1.2rem; color: var(--text-secondary); }
-.list { display: flex; flex-direction: column; gap: 16px; }
-.tiquete { display: flex; justify-content: space-between; gap: 24px; padding: 24px; }
-.tiquete:hover { transform: none; border-color: var(--border-accent); }
-.tiqueteLeft { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-.peliInfo { display: flex; flex-direction: column; gap: 6px; }
-.peliInfo h3 { font-size: 1.1rem; }
-.tiqueteMeta { display: flex; flex-wrap: wrap; gap: 12px; }
-.tiqueteMeta span { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--text-secondary); }
-.asientosList { display: flex; flex-wrap: wrap; gap: 6px; }
-.asiento { padding: 3px 9px; background: var(--accent-glow); border: 1px solid var(--border-accent); border-radius: 4px; font-size: 0.78rem; font-weight: 700; color: var(--accent); }
-.tiqueteRight { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; gap: 16px; flex-shrink: 0; }
-.codigoBox { text-align: right; }
-.codigoLabel { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px; }
-.codigo { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 900; letter-spacing: 0.1em; color: var(--accent); }
-.totalBox { text-align: right; }
-.totalLabel { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; }
-.total { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
-@media (max-width: 600px) { .tiquete { flex-direction: column; } .tiqueteRight { align-items: flex-start; } }
+.main { padding: 80px 0 64px; }
+.header { margin-bottom: 32px; }
+.header h1 { font-size: 1.8rem; margin-bottom: 6px; }
+.header p { color: var(--text-secondary); font-size: 0.9rem; }
 
-.tiqueteMain { display: flex; justify-content: space-between; gap: 24px; }
-.btnQr { font-size: 0.78rem; padding: 6px 12px; margin-top: 8px; }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.tiquete { padding: 0; }
+.tiquete:hover { transform: none; border-color: var(--border-strong); }
+.tiqueteMain { display: flex; justify-content: space-between; gap: 20px; padding: 20px 22px; }
+.tiqueteLeft { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.peliInfo { display: flex; flex-direction: column; gap: 5px; }
+.peliInfo h3 { font-size: 1rem; font-weight: 700; }
+.tiqueteMeta { display: flex; flex-wrap: wrap; gap: 10px; }
+.tiqueteMeta span { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-secondary); }
+.asientosList { display: flex; flex-wrap: wrap; gap: 5px; }
+.asiento { padding: 2px 8px; background: var(--gold-subtle); border: 1px solid var(--gold-border); border-radius: 4px; font-size: 0.76rem; font-weight: 700; color: var(--gold-light); }
+
+.tiqueteRight { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; gap: 12px; flex-shrink: 0; }
+.codigoBox { text-align: right; }
+.codigoLabel { display: flex; align-items: center; justify-content: flex-end; gap: 3px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; }
+.codigo { font-family: 'Courier New', monospace; font-size: 1rem; font-weight: 900; letter-spacing: 0.08em; color: var(--gold); }
+.totalBox { text-align: right; }
+.totalLabel { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px; }
+.total { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+
+.btnQr { font-size: 0.76rem; padding: 5px 11px; }
+
 .qrPanel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 0 4px;
-  border-top: 1px dashed var(--border-accent);
-  margin-top: 16px;
-  animation: fadeIn 0.3s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 0 16px;
+  border-top: 1px dashed var(--gold-border);
+  background: var(--bg-elevated);
+  animation: fadeUp 0.25s ease;
 }
-.qrBox {
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-  border: 2px solid var(--border-accent);
+.qrBox { background: #fff; border-radius: var(--radius-lg); padding: 8px; border: 2px solid var(--gold-border); }
+.qrHint { font-size: 0.76rem; color: var(--text-muted); text-align: center; }
+
+@media (max-width: 600px) {
+  .tiqueteMain { flex-direction: column; }
+  .tiqueteRight { align-items: flex-start; }
 }
-.qrHint { font-size: 0.78rem; color: var(--text-muted); text-align: center; }

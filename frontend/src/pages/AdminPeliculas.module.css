@@ -1,22 +1,25 @@
-.wrap { display: flex; flex-direction: column; gap: 24px; }
+.wrap { display: flex; flex-direction: column; gap: 20px; }
 .header { display: flex; justify-content: space-between; align-items: center; }
-.header h2 { font-size: 1.3rem; }
+.header h2 { font-size: 1.2rem; font-weight: 700; }
+
 .formCard { padding: 0; }
-.formCard:hover { transform: none; }
-.formHeader { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-.formHeader h3 { font-size: 1rem; font-family: 'DM Sans', sans-serif; font-weight: 600; }
-.closeBtn { background: none; border: none; color: var(--text-muted); display: flex; transition: color 0.2s; }
+.formCard:hover { transform: none; border-color: var(--border-strong); }
+.formHeader { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.formHeader h3 { font-size: 0.95rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+.closeBtn { background: none; border: none; color: var(--text-muted); display: flex; transition: color 0.15s; }
 .closeBtn:hover { color: var(--text-primary); }
-.form { padding: 24px; }
-.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
-.formActions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+.form { padding: 20px; }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.formActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+
 .tableCard { padding: 0; overflow-x: auto; }
-.tableCard:hover { transform: none; }
-.table { width: 100%; border-collapse: collapse; min-width: 600px; }
-.table th { padding: 12px 20px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-.table td { padding: 14px 20px; font-size: 0.88rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.tableCard:hover { transform: none; border-color: var(--border-strong); }
+.table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.table th { padding: 11px 18px; text-align: left; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.table td { padding: 13px 18px; font-size: 0.86rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); vertical-align: middle; }
 .table tr:last-child td { border-bottom: none; }
-.table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.table tbody tr:hover td { background: var(--bg-elevated); }
 .pelInfo { display: flex; align-items: center; gap: 10px; }
-.thumb { width: 36px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
+.thumb { width: 32px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
+
 @media (max-width: 600px) { .formGrid { grid-template-columns: 1fr; } }

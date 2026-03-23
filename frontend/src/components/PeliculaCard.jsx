@@ -21,7 +21,7 @@ export default function PeliculaCard({ pelicula }) {
   const esPreventa = pelicula.estado === 'preventa';
 
   return (
-    <Link to={`/pelicula/${pelicula.id}`} className={`card ${styles.card}`}>
+    <Link to={`/pelicula/${pelicula.id}`} className={styles.card}>
       <div className={styles.imgWrap}>
         <img
           src={src}
@@ -35,7 +35,9 @@ export default function PeliculaCard({ pelicula }) {
             }
           }}
         />
-        <div className={styles.overlay} />
+
+        {/* Gradiente que integra imagen con el contenido de abajo */}
+        <div className={styles.gradient} />
 
         {esPreventa && (
           <span className={styles.badgePreventa}>
@@ -43,22 +45,19 @@ export default function PeliculaCard({ pelicula }) {
           </span>
         )}
 
-        {/* Descripción aparece en hover */}
-        <div className={styles.hoverInfo}>
+        {/* Descripción en hover */}
+        <div className={styles.hoverOverlay}>
           <p className={styles.hoverDesc}>{pelicula.descripcion}</p>
-          <div className={styles.hoverMeta}>
-            <span className={styles.hoverGenre}>{pelicula.genero}</span>
-            <span className={styles.hoverClasif}>{pelicula.clasificacion}</span>
-          </div>
+          <span className={styles.hoverTag}>{pelicula.genero} · {pelicula.clasificacion}</span>
         </div>
-      </div>
 
-      {/* Solo título y duración */}
-      <div className={styles.body}>
-        <h3 className={styles.titulo}>{pelicula.titulo}</h3>
-        <span className={styles.duracion}>
-          <Clock size={11} /> {pelicula.duracion} min
-        </span>
+        {/* Título y metadata integrados en la imagen */}
+        <div className={styles.info}>
+          <h3 className={styles.titulo}>{pelicula.titulo}</h3>
+          <span className={styles.duracion}>
+            <Clock size={10} /> {pelicula.duracion} min
+          </span>
+        </div>
       </div>
     </Link>
   );

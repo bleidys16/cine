@@ -3,7 +3,7 @@ import pool from '../db/connection.js';
 export const listar = async (req, res) => {
   try {
     const { rows } = await pool.query(
-      "SELECT * FROM peliculas WHERE estado = 'activa' ORDER BY id DESC"
+      "SELECT * FROM peliculas WHERE estado IN ('activa', 'preventa') ORDER BY estado ASC, id DESC"
     );
     res.json(rows);
   } catch (err) {

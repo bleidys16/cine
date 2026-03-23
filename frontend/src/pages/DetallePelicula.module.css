@@ -1,54 +1,135 @@
 .main { padding-top: 60px; min-height: 100vh; }
 
+/* Backdrop difuminado */
 .backdrop {
   position: fixed; top: 0; left: 0; right: 0;
   height: 55vh; z-index: 0; overflow: hidden;
 }
-.backdrop img { width: 100%; height: 100%; object-fit: cover; filter: blur(24px) brightness(0.2); transform: scale(1.08); }
-.backdropOverlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, var(--bg-base) 75%); }
+.backdrop img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: blur(28px) brightness(0.18);
+  transform: scale(1.1);
+}
+.backdropOverlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.2) 0%, var(--bg-base) 72%);
+}
 
-.content { position: relative; z-index: 1; padding-top: 36px; padding-bottom: 80px; }
-.back { margin-bottom: 28px; }
+.content { position: relative; z-index: 1; padding-top: 32px; padding-bottom: 80px; }
+.back { margin-bottom: 24px; }
 
-.info { display: grid; grid-template-columns: 200px 1fr; gap: 36px; margin-bottom: 52px; align-items: start; }
-.poster { border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: 1px solid var(--border); flex-shrink: 0; }
-.poster img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+/* Info película */
+.info {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 32px;
+  margin-bottom: 48px;
+  align-items: start;
+}
+.poster {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  border: 1px solid var(--border);
+}
+.poster img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
 
-.details { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
-.titulo { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; }
-.meta { display: flex; gap: 8px; flex-wrap: wrap; }
-.desc { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; max-width: 520px; }
+.details { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+.titulo { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; max-width: 500px; }
 
-.secTitle { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
+/* Sección funciones */
+.secTitle { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: var(--text-primary); }
 
 .noFunciones {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 56px; color: var(--text-muted); text-align: center;
+  padding: 48px; color: var(--text-muted); text-align: center;
   border: 1px dashed var(--border); border-radius: var(--radius-lg);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
-.funciones { display: flex; flex-direction: column; gap: 10px; }
+.funciones { display: flex; flex-direction: column; gap: 8px; }
+
+/* Card de función — layout limpio tipo fila de tabla */
 .funcionCard {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 22px; gap: 20px;
-  transition: border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 16px;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
 }
-.funcionCard:hover { border-color: var(--border-strong); }
+.funcionCard:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
 
-.funcionInfo { display: flex; flex-direction: column; gap: 6px; }
-.funcionFecha { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); text-transform: capitalize; }
-.funcionHora { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
-.funcionMeta { display: flex; gap: 6px; }
+/* Lado izquierdo — fecha + hora + sala */
+.funcionInfo { display: flex; align-items: center; gap: 20px; }
 
-.funcionRight { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+.funcionFechaHora { display: flex; flex-direction: column; gap: 3px; }
+.funcionFecha {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+/* Hora — tamaño normal, no gigante */
+.funcionHora {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.funcionMeta { display: flex; gap: 6px; align-items: center; }
+
+/* Lado derecho — disponibles + precio + botón */
+.funcionRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.disponibles {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+.disponiblesNum {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Precio — el dato más importante del lado derecho */
 .precio { text-align: right; }
-.precioLabel { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; }
-.precioVal { font-family: 'Poppins', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--text-primary); }
+.precioLabel {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 1px;
+}
+.precioVal {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
 
 @media (max-width: 768px) {
-  .info { grid-template-columns: 1fr; }
-  .poster { max-width: 160px; }
-  .funcionCard { flex-direction: column; align-items: flex-start; }
+  .info { grid-template-columns: 140px 1fr; gap: 20px; }
+  .funcionCard { flex-direction: column; align-items: flex-start; gap: 12px; }
   .funcionRight { width: 100%; justify-content: space-between; }
+  .funcionInfo { flex-wrap: wrap; gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .info { grid-template-columns: 1fr; }
+  .poster { max-width: 140px; }
 }

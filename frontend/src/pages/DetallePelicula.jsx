@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, MapPin, ChevronRight, ArrowLeft, Users, Tag } from 'lucide-react';
+import { Clock, MapPin, ArrowLeft, Users, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { formatFecha } from '../utils/fecha.js';
+import { formatFecha, formatHora } from '../utils/fecha.js';
 import styles from './DetallePelicula.module.css';
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+const getProxy = (url) => {
+  if (!url?.includes('image.tmdb.org')) return url;
+  const path = url.split('/w500/')[1] || url.split('/w342/')[1];
+  return path ? `${API}/tmdb/poster/${path}` : url;
+};
 
 export default function DetallePelicula() {
   const { id } = useParams();
@@ -15,91 +23,109 @@ export default function DetallePelicula() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get(`/peliculas/${id}`), api.get(`/funciones/pelicula/${id}`)])
-      .then(([p, f]) => { setPelicula(p.data); setFunciones(f.data); })
-      .catch(console.error)
+    Promise.all([
+      api.get(`/peliculas/${id}`),
+      api.get(`/funciones/pelicula/${id}`)
+    ]).then(([p, f]) => {
+      setPelicula(p.data);
+      setFunciones(f.data);
+    }).catch(console.error)
       .finally(() => setCargando(false));
   }, [id]);
 
-  const handleSeleccionarFuncion = (funcion) => {
+  const handleComprar = (funcion) => {
     if (!usuario) { navigate('/login'); return; }
     navigate(`/comprar/${funcion.id}`);
   };
 
-  if (cargando) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}><div className="spinner" style={{ width: 40, height: 40 }} /></div>;
-  if (!pelicula) return <div style={{ textAlign: 'center', padding: '80px', color: 'var(--text-muted)' }}>Película no encontrada</div>;
+  if (cargando) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+      <div className="spinner" style={{ width: 32, height: 32 }} />
+    </div>
+  );
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-  const getImg = (url) => {
-    if (!url) return `https://placehold.co/400x600/111111/c9a84c?text=${encodeURIComponent(pelicula.titulo.slice(0,10))}`;
-    if (url.includes('image.tmdb.org')) { const p = url.split('/w500/')[1]; return p ? `${API}/tmdb/poster/${p}` : url; }
-    return url;
-  };
+  if (!pelicula) return (
+    <div style={{ textAlign: 'center', padding: '80px', color: 'var(--text-muted)' }}>
+      Película no encontrada
+    </div>
+  );
+
+  const imgSrc = getProxy(pelicula.imagen_url) || `https://placehold.co/400x600/111/555?text=${encodeURIComponent(pelicula.titulo)}`;
 
   return (
     <main className={styles.main}>
       <div className={styles.backdrop}>
-        <img src={getImg(pelicula.imagen_url)} alt="" />
+        <img src={imgSrc} alt="" />
         <div className={styles.backdropOverlay} />
       </div>
+
       <div className={`container ${styles.content}`}>
-        <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}><ArrowLeft size={16} /> Volver</button>
+        <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}>
+          <ArrowLeft size={15} /> Volver
+        </button>
+
+        {/* Info película */}
         <div className={styles.info}>
           <div className={styles.poster}>
-            <img src={getImg(pelicula.imagen_url)} alt={pelicula.titulo} onError={e => e.target.src = `https://placehold.co/300x450/111111/c9a84c?text=${encodeURIComponent(pelicula.titulo.slice(0,10))}`} />
+            <img src={imgSrc} alt={pelicula.titulo}
+              onError={e => e.target.src = `https://placehold.co/400x600/111/555?text=${encodeURIComponent(pelicula.titulo)}`}
+            />
           </div>
           <div className={styles.details}>
-            <span className="badge badge-gray">{pelicula.clasificacion}</span>
             <h1 className={styles.titulo}>{pelicula.titulo}</h1>
             <div className={styles.meta}>
               <span className="tag"><Clock size={12} /> {pelicula.duracion} min</span>
               <span className="tag">{pelicula.genero}</span>
+              <span className="badge badge-gray">{pelicula.clasificacion}</span>
             </div>
             <p className={styles.desc}>{pelicula.descripcion}</p>
           </div>
         </div>
 
-        <div className={styles.funcionesSection}>
-          <h2 className={styles.secTitle}>Funciones disponibles</h2>
-          {funciones.length === 0 ? (
-            <div className={styles.noFunciones}><Calendar size={36} strokeWidth={1} /><p>No hay funciones programadas para esta película</p></div>
-          ) : (
-            <div className={styles.funciones}>
-              {funciones.map(f => (
-                <div key={f.id} className={`card ${styles.funcionCard}`}>
-                  <div className={styles.funcionInfo}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className={styles.funcionFecha}><Calendar size={14} /><span>{formatFecha(f.fecha, { weekday: 'long' })}</span></div>
-                      {f.estado === 'preventa' && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(201,168,76,0.15)', color: 'var(--gold)', border: '1px solid var(--gold-border)', borderRadius: '100px', padding: '2px 8px', fontSize: '0.7rem', fontWeight: 700 }}>
-                          <Tag size={10} /> PREVENTA
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.funcionHora}>{f.hora?.slice(0, 5)}</div>
-                    <div className={styles.funcionMeta}>
-                      <span className="tag"><MapPin size={11} /> {f.sala}</span>
-                      <span className="tag"><Users size={11} /> {f.asientos_disponibles} disponibles</span>
-                    </div>
+        {/* Funciones */}
+        <h2 className={styles.secTitle}>Funciones disponibles</h2>
+
+        {funciones.length === 0 ? (
+          <div className={styles.noFunciones}>
+            <p>No hay funciones programadas para esta película</p>
+          </div>
+        ) : (
+          <div className={styles.funciones}>
+            {funciones.map(f => (
+              <div key={f.id} className={`card ${styles.funcionCard}`} onClick={() => handleComprar(f)}>
+                <div className={styles.funcionInfo}>
+                  <div className={styles.funcionFechaHora}>
+                    <span className={styles.funcionFecha}>
+                      {formatFecha(f.fecha, { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </span>
+                    <span className={styles.funcionHora}>{formatHora(f.hora)}</span>
                   </div>
-                  <div className={styles.funcionRight}>
-                    <div className={styles.precio}>
-                      <span className={styles.precioLabel}>{f.estado === 'preventa' ? 'precio preventa' : 'por asiento'}</span>
-                      <span className={styles.precioVal}>${Number(f.precio).toLocaleString('es-CO')}</span>
-                    </div>
-                    <button
-                      className={`btn ${f.estado === 'preventa' ? 'btn-outline' : 'btn-primary'}`}
-                      onClick={() => handleSeleccionarFuncion(f)}
-                      disabled={f.asientos_disponibles === 0}
-                    >
-                      {f.asientos_disponibles === 0 ? 'Agotado' : f.estado === 'preventa' ? <>Reservar <ChevronRight size={16} /></> : <>Comprar <ChevronRight size={16} /></>}
-                    </button>
+                  <div className={styles.funcionMeta}>
+                    <span className="tag"><MapPin size={11} /> {f.sala}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+
+                <div className={styles.funcionRight}>
+                  <div className={styles.disponibles}>
+                    <span className={styles.disponiblesNum}>{f.asientos_disponibles}</span>
+                    asientos libres
+                  </div>
+                  <div className={styles.precio}>
+                    <span className={styles.precioLabel}>por asiento</span>
+                    <span className={styles.precioVal}>${Number(f.precio).toLocaleString('es-CO')}</span>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    disabled={f.asientos_disponibles === 0}
+                    onClick={e => { e.stopPropagation(); handleComprar(f); }}
+                  >
+                    {f.asientos_disponibles === 0 ? 'Agotado' : <>Comprar <ChevronRight size={14} /></>}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

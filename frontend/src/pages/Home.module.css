@@ -86,12 +86,11 @@
 
 .section { margin-bottom: 48px; }
 
-/* Grid uniforme — todas las cards igual de altas */
+/* Grid — máximo 5 columnas, mínimo 200px */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 16px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
 }
 
 /* Preventa section */
@@ -126,7 +125,6 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
-  .cards { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
 @media (max-width: 768px) {
   .hero { height: 320px; }
@@ -135,9 +133,9 @@
   .heroOverlay {
     background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.75) 60%, rgba(10,10,10,0.97) 100%);
   }
-  .cards { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cards { grid-template-columns: repeat(3, 1fr); gap: 14px; }
 }
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .hero { height: 260px; }
-  .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }

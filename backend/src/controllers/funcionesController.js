@@ -9,7 +9,7 @@ export const listar = async (req, res) => {
       FROM funciones f
       JOIN peliculas p ON f.pelicula_id = p.id
       LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
-      WHERE f.estado = 'disponible' AND f.fecha >= CURRENT_DATE
+      WHERE f.estado IN ('disponible', 'preventa') AND f.fecha >= CURRENT_DATE
       GROUP BY f.id, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion
       ORDER BY f.fecha ASC, f.hora ASC
     `);
@@ -27,7 +27,7 @@ export const listarPorPelicula = async (req, res) => {
         150 - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
       FROM funciones f
       LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
-      WHERE f.pelicula_id = $1 AND f.estado = 'disponible' AND f.fecha >= CURRENT_DATE
+      WHERE f.pelicula_id = $1 AND f.estado IN ('disponible', 'preventa') AND f.fecha >= CURRENT_DATE
       GROUP BY f.id
       ORDER BY f.fecha ASC, f.hora ASC
     `, [req.params.peliculaId]);
@@ -54,14 +54,13 @@ export const obtenerAsientos = async (req, res) => {
 };
 
 export const crear = async (req, res) => {
-  const { pelicula_id, fecha, hora, sala, precio } = req.body;
+  const { pelicula_id, fecha, hora, sala, precio, estado } = req.body;
   if (!pelicula_id || !fecha || !hora || !precio)
     return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
-
   try {
     const { rows } = await pool.query(
-      'INSERT INTO funciones (pelicula_id, fecha, hora, sala, precio) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-      [pelicula_id, fecha, hora, sala || 'Sala 1', precio]
+      'INSERT INTO funciones (pelicula_id, fecha, hora, sala, precio, estado) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+      [pelicula_id, fecha, hora, sala || 'Sala 1', precio, estado || 'disponible']
     );
     res.status(201).json(rows[0]);
   } catch (err) {

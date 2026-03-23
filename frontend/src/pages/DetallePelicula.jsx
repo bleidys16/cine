@@ -1,9 +1,9 @@
-import { formatFecha } from '../utils/fecha.js';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, MapPin, ChevronRight, ArrowLeft, Users } from 'lucide-react';
+import { Clock, Calendar, MapPin, ChevronRight, ArrowLeft, Users, Tag } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { formatFecha } from '../utils/fecha.js';
 import styles from './DetallePelicula.module.css';
 
 export default function DetallePelicula() {
@@ -15,50 +15,38 @@ export default function DetallePelicula() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      api.get(`/peliculas/${id}`),
-      api.get(`/funciones/pelicula/${id}`)
-    ]).then(([p, f]) => {
-      setPelicula(p.data);
-      setFunciones(f.data);
-    }).catch(console.error)
+    Promise.all([api.get(`/peliculas/${id}`), api.get(`/funciones/pelicula/${id}`)])
+      .then(([p, f]) => { setPelicula(p.data); setFunciones(f.data); })
+      .catch(console.error)
       .finally(() => setCargando(false));
   }, [id]);
 
   const handleSeleccionarFuncion = (funcion) => {
-    if (!usuario) {
-      navigate('/login');
-      return;
-    }
+    if (!usuario) { navigate('/login'); return; }
     navigate(`/comprar/${funcion.id}`);
   };
 
-  if (cargando) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
-    </div>
-  );
-
+  if (cargando) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}><div className="spinner" style={{ width: 40, height: 40 }} /></div>;
   if (!pelicula) return <div style={{ textAlign: 'center', padding: '80px', color: 'var(--text-muted)' }}>Película no encontrada</div>;
 
-  const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(pelicula.titulo)}&background=111620&color=e8b84b&size=800`;
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+  const getImg = (url) => {
+    if (!url) return `https://placehold.co/400x600/111111/c9a84c?text=${encodeURIComponent(pelicula.titulo.slice(0,10))}`;
+    if (url.includes('image.tmdb.org')) { const p = url.split('/w500/')[1]; return p ? `${API}/tmdb/poster/${p}` : url; }
+    return url;
+  };
 
   return (
     <main className={styles.main}>
-      {/* Hero backdrop */}
       <div className={styles.backdrop}>
-        <img src={pelicula.imagen_url || fallbackImg} alt="" onError={e => e.target.src = fallbackImg} />
+        <img src={getImg(pelicula.imagen_url)} alt="" />
         <div className={styles.backdropOverlay} />
       </div>
-
       <div className={`container ${styles.content}`}>
-        <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}>
-          <ArrowLeft size={16} /> Volver
-        </button>
-
+        <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}><ArrowLeft size={16} /> Volver</button>
         <div className={styles.info}>
           <div className={styles.poster}>
-            <img src={pelicula.imagen_url || fallbackImg} alt={pelicula.titulo} onError={e => e.target.src = fallbackImg} />
+            <img src={getImg(pelicula.imagen_url)} alt={pelicula.titulo} onError={e => e.target.src = `https://placehold.co/300x450/111111/c9a84c?text=${encodeURIComponent(pelicula.titulo.slice(0,10))}`} />
           </div>
           <div className={styles.details}>
             <span className="badge badge-gold">{pelicula.clasificacion}</span>
@@ -71,22 +59,22 @@ export default function DetallePelicula() {
           </div>
         </div>
 
-        {/* Funciones */}
         <div className={styles.funcionesSection}>
           <h2 className={styles.secTitle}>Funciones disponibles</h2>
           {funciones.length === 0 ? (
-            <div className={styles.noFunciones}>
-              <Calendar size={36} strokeWidth={1} />
-              <p>No hay funciones programadas para esta película</p>
-            </div>
+            <div className={styles.noFunciones}><Calendar size={36} strokeWidth={1} /><p>No hay funciones programadas para esta película</p></div>
           ) : (
             <div className={styles.funciones}>
               {funciones.map(f => (
                 <div key={f.id} className={`card ${styles.funcionCard}`}>
                   <div className={styles.funcionInfo}>
-                    <div className={styles.funcionFecha}>
-                      <Calendar size={14} />
-                      <span>{formatFecha(f.fecha, { weekday: 'long' })}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className={styles.funcionFecha}><Calendar size={14} /><span>{formatFecha(f.fecha, { weekday: 'long' })}</span></div>
+                      {f.estado === 'preventa' && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(201,168,76,0.15)', color: 'var(--gold)', border: '1px solid var(--gold-border)', borderRadius: '100px', padding: '2px 8px', fontSize: '0.7rem', fontWeight: 700 }}>
+                          <Tag size={10} /> PREVENTA
+                        </span>
+                      )}
                     </div>
                     <div className={styles.funcionHora}>{f.hora?.slice(0, 5)}</div>
                     <div className={styles.funcionMeta}>
@@ -96,15 +84,15 @@ export default function DetallePelicula() {
                   </div>
                   <div className={styles.funcionRight}>
                     <div className={styles.precio}>
-                      <span className={styles.precioLabel}>por asiento</span>
+                      <span className={styles.precioLabel}>{f.estado === 'preventa' ? 'precio preventa' : 'por asiento'}</span>
                       <span className={styles.precioVal}>${Number(f.precio).toLocaleString('es-CO')}</span>
                     </div>
                     <button
-                      className="btn btn-primary"
+                      className={`btn ${f.estado === 'preventa' ? 'btn-outline' : 'btn-primary'}`}
                       onClick={() => handleSeleccionarFuncion(f)}
                       disabled={f.asientos_disponibles === 0}
                     >
-                      {f.asientos_disponibles === 0 ? 'Agotado' : <>Comprar <ChevronRight size={16} /></>}
+                      {f.asientos_disponibles === 0 ? 'Agotado' : f.estado === 'preventa' ? <>Reservar <ChevronRight size={16} /></> : <>Comprar <ChevronRight size={16} /></>}
                     </button>
                   </div>
                 </div>

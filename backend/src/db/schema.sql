@@ -112,3 +112,7 @@ INSERT INTO peliculas (titulo, descripcion, duracion, genero, clasificacion, ima
 ('Gladiador II', 'La continuación épica de la historia de la Roma antigua, llena de acción y traición.', 148, 'Acción', '+13', 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg'),
 ('Wicked', 'La historia jamás contada de las brujas de Oz, basada en el exitoso musical de Broadway.', 160, 'Musical', 'Para todos', 'https://image.tmdb.org/t/p/w500/c5XcBBLXWdVuCCzlC9cBJXFGrEU.jpg')
 ON CONFLICT DO NOTHING;
+
+-- Agregar estado preventa a funciones (ejecutar si ya existe la tabla)
+-- ALTER TABLE funciones DROP CONSTRAINT IF EXISTS funciones_estado_check;
+-- ALTER TABLE funciones ADD CONSTRAINT funciones_estado_check CHECK (estado IN ('disponible', 'cancelada', 'preventa'));

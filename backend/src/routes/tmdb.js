@@ -82,4 +82,3 @@ router.get('/poster/:path(*)', async (req, res) => {
 });
 
 export default router;
-# Mon Mar 23 00:31:52 UTC 2026

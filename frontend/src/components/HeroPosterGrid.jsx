@@ -1,15 +1,20 @@
 import styles from './HeroPosterGrid.module.css';
 
-// Para el hero usamos TMDB directo — son decorativas, no importa si alguna falla
-// El proxy solo es necesario para las cards donde la imagen es protagonista
-const TMDB = 'https://image.tmdb.org/t/p/w342';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const proxy = (url) => {
+  if (!url) return null;
+  if (url.includes('image.tmdb.org')) {
+    const path = url.split('/w500/')[1] || url.split('/w342/')[1];
+    if (path) return `${API}/tmdb/poster/${path}`;
+  }
+  return url;
+};
 
-const FALLBACK_PATHS = [
-  '8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg',
-  '8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-  '2cxhvwyEwRlysAmRH4iodkvo0z5.jpg',
+// Paths de respaldo — mismos que usan las cards exitosamente
+const FALLBACK = [
   'iADOJ8Zymht2JPMoy3R7xceZprc.jpg',
   'kCGlIMHnOm8JPXNbFK0yFxMa5y9.jpg',
+  '8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
   'obRBIGMBRRz3MjBkkgmZdMsSHbR.jpg',
   'MXvBsmFKRGKbaDROUBPSl2K4g6.jpg',
   'lqoMzCcZYEFK729d6qzt349fB4o.jpg',
@@ -17,25 +22,19 @@ const FALLBACK_PATHS = [
   'H6vke7zGiuLsz4v4RPeReb9rsv.jpg',
   'hUu9zyZmKuCuitNKaBBgMBuSopx.jpg',
   'vBZ0qvaRxqEhZwl6LWmruJqWE8Z.jpg',
-];
+  '8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg',
+  '2cxhvwyEwRlysAmRH4iodkvo0z5.jpg',
+].map(p => `${API}/tmdb/poster/${p}`);
 
 export default function HeroPosterGrid({ peliculas = [] }) {
-  // URLs de la BD — extraer solo el path y usar TMDB directo
+  // Usar las mismas URLs proxeadas que usan las cards — ya están en caché del browser
   const fromDB = peliculas
     .filter(p => p.imagen_url?.includes('image.tmdb.org'))
-    .map(p => {
-      const path = p.imagen_url.split('/w500/')[1] || p.imagen_url.split('/w342/')[1];
-      return path ? `${TMDB}/${path}` : null;
-    })
+    .map(p => proxy(p.imagen_url))
     .filter(Boolean);
 
-  const fallbacks = FALLBACK_PATHS.map(p => `${TMDB}/${p}`);
-  const allPosters = [...fromDB, ...fallbacks];
-
-  // Asegurar 16 posters
+  const allPosters = [...fromDB, ...FALLBACK];
   const posters = Array.from({ length: 16 }, (_, i) => allPosters[i % allPosters.length]);
-
-  // 4 columnas
   const cols = [[], [], [], []];
   posters.forEach((src, i) => cols[i % 4].push(src));
 
@@ -49,7 +48,7 @@ export default function HeroPosterGrid({ peliculas = [] }) {
                 src={src}
                 alt=""
                 className={styles.poster}
-                loading="lazy"
+                loading={pi < 4 ? 'eager' : 'lazy'}
                 onError={e => {
                   e.target.style.display = 'none';
                   e.target.parentElement.style.background = '#161616';

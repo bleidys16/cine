@@ -2,47 +2,26 @@ import styles from './HeroPosterGrid.module.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// wsrv.nl es un CDN proxy gratuito que no duerme — ideal para el hero decorativo
-// Para las cards usamos el proxy del backend porque necesitan mejor calidad
-const cdnProxy = (path) =>
-  `https://wsrv.nl/?url=image.tmdb.org/t/p/w342/${path}&w=200&output=webp&q=70`;
-
-const backendProxy = (url) => {
-  if (!url?.includes('image.tmdb.org')) return url;
+const getProxy = (url) => {
+  if (!url?.includes('image.tmdb.org')) return null;
   const path = url.split('/w500/')[1] || url.split('/w342/')[1];
-  return path ? `${API}/tmdb/poster/${path}` : url;
+  return path ? `${API}/tmdb/poster/${path}` : null;
 };
 
-const FALLBACK_PATHS = [
-  'iADOJ8Zymht2JPMoy3R7xceZprc.jpg',
-  'kCGlIMHnOm8JPXNbFK0yFxMa5y9.jpg',
-  '8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-  'obRBIGMBRRz3MjBkkgmZdMsSHbR.jpg',
-  'MXvBsmFKRGKbaDROUBPSl2K4g6.jpg',
-  'lqoMzCcZYEFK729d6qzt349fB4o.jpg',
-  'lurEK87kukWNaHd0zYnsi3yzJrs.jpg',
-  'H6vke7zGiuLsz4v4RPeReb9rsv.jpg',
-  'hUu9zyZmKuCuitNKaBBgMBuSopx.jpg',
-  'vBZ0qvaRxqEhZwl6LWmruJqWE8Z.jpg',
-  '8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg',
-  '2cxhvwyEwRlysAmRH4iodkvo0z5.jpg',
-];
-
 export default function HeroPosterGrid({ peliculas = [] }) {
-  const fromDB = peliculas
+  // Solo usar imágenes que ya están en la BD y funcionan
+  const posters = peliculas
     .filter(p => p.imagen_url?.includes('image.tmdb.org'))
-    .map(p => {
-      const path = p.imagen_url.split('/w500/')[1] || p.imagen_url.split('/w342/')[1];
-      return path ? cdnProxy(path) : null;
-    })
+    .map(p => getProxy(p.imagen_url))
     .filter(Boolean);
 
-  const fallbacks = FALLBACK_PATHS.map(cdnProxy);
-  const allPosters = [...fromDB, ...fallbacks];
-  const posters = Array.from({ length: 16 }, (_, i) => allPosters[i % allPosters.length]);
+  if (posters.length === 0) return <div className={styles.grid} />;
+
+  // Repetir hasta tener 16
+  const filled = Array.from({ length: 16 }, (_, i) => posters[i % posters.length]);
 
   const cols = [[], [], [], []];
-  posters.forEach((src, i) => cols[i % 4].push(src));
+  filled.forEach((src, i) => cols[i % 4].push(src));
 
   return (
     <div className={styles.grid} aria-hidden="true">
@@ -56,15 +35,8 @@ export default function HeroPosterGrid({ peliculas = [] }) {
                 className={styles.poster}
                 loading={pi < 8 ? 'eager' : 'lazy'}
                 onError={e => {
-                  // Si wsrv.nl falla, intentar con backend proxy
-                  if (!e.target.dataset.fallback) {
-                    e.target.dataset.fallback = 'true';
-                    const path = src.split('w342/')[1]?.split('&')[0];
-                    if (path) e.target.src = `${API}/tmdb/poster/${path}`;
-                  } else {
-                    e.target.style.display = 'none';
-                    e.target.parentElement.style.background = '#161616';
-                  }
+                  e.target.style.display = 'none';
+                  e.target.parentElement.style.background = '#161616';
                 }}
               />
             </div>

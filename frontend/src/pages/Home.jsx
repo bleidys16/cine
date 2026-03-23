@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import api from '../services/api';
 import PeliculaCard from '../components/PeliculaCard';
 import HeroPosterGrid from '../components/HeroPosterGrid';
@@ -20,7 +20,6 @@ export default function Home() {
       .finally(() => setCargando(false));
   }, []);
 
-  // Solo películas activas en cartelera (sin preventa)
   const enCartelera = peliculas.filter(p => p.estado === 'activa');
 
   const filtradas = enCartelera.filter(p => {
@@ -36,12 +35,8 @@ export default function Home() {
         <div className={styles.heroOverlay} />
         <div className="container">
           <div className={styles.heroContent}>
-<h1 className={styles.heroTitle}>
-              Vive la magia<br />del <span className={styles.heroAccent}>cine</span>
-            </h1>
-            <p className={styles.heroSub}>
-              Selecciona tu película, elige tu asiento y disfruta de la mejor experiencia cinematográfica.
-            </p>
+            <h1 className={styles.heroTitle}>Tu próxima<br />película favorita<br />te está esperando</h1>
+            <p className={styles.heroSub}>Compra tus tiquetes en segundos, elige tu asiento y disfruta.</p>
           </div>
         </div>
       </section>
@@ -50,7 +45,7 @@ export default function Home() {
         <div className="container">
           <div className={styles.filtersInner}>
             <div className={styles.searchWrap}>
-              <Search size={15} className={styles.searchIcon} />
+              <Search size={14} className={styles.searchIcon} />
               <input
                 className={`input ${styles.searchInput}`}
                 placeholder="Buscar película..."
@@ -71,14 +66,11 @@ export default function Home() {
         <div className="container">
           {cargando ? (
             <div className={styles.loading}>
-              <div className="spinner" style={{ width: 36, height: 36 }} />
+              <div className="spinner" style={{ width: 32, height: 32 }} />
               <p>Cargando cartelera...</p>
             </div>
           ) : filtradas.length === 0 ? (
-            <div className={styles.empty}>
-              <Film size={44} strokeWidth={1} />
-              <p>No hay películas disponibles</p>
-            </div>
+            <div className={styles.empty}><p>No hay películas disponibles</p></div>
           ) : (
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
@@ -88,7 +80,7 @@ export default function Home() {
               </div>
               <div className={styles.cards}>
                 {filtradas.map((p, i) => (
-                  <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                  <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.04}s` }}>
                     <PeliculaCard pelicula={p} />
                   </div>
                 ))}

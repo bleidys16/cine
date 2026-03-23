@@ -1,59 +1,129 @@
 .main { padding-top: 60px; padding-bottom: 80px; min-height: 100vh; }
-.back { margin: 28px 0 24px; }
+.back { margin: 24px 0 20px; }
 
-.layout { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start; }
-
-.seatSection { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; }
-.sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.sectionHeader h2 { font-size: 1.05rem; font-weight: 700; }
-
-.resumen { position: sticky; top: 80px; }
-.resumenCard { padding: 20px; }
-.resumenTitle { font-size: 1rem; font-weight: 700; margin-bottom: 14px; line-height: 1.3; }
-.resumenMeta { display: flex; flex-direction: column; gap: 7px; margin-bottom: 4px; }
-.resumenItem { display: flex; align-items: center; gap: 7px; font-size: 0.83rem; color: var(--text-secondary); }
-
-.asientosSelec { margin: 4px 0; }
-.asientosPills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-.asientoPill {
-  padding: 3px 9px;
-  background: var(--bg-overlay);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem; font-weight: 600;
-  color: var(--text-primary);
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
 }
 
-.totalRow { display: flex; justify-content: space-between; align-items: center; }
-.totalRow span { font-size: 0.85rem; color: var(--text-secondary); }
-.totalVal {  font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
-
-.btnComprar { width: 100%; padding: 12px; margin-top: 14px; font-size: 0.9rem; }
-
-/* QR */
-.qrWrap { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 16px 0; }
-.qrBox { background: #fff; border-radius: var(--radius-lg); padding: 10px; border: 1px solid var(--border-strong); }
-.btnDescargar { font-size: 0.8rem; padding: 7px 14px; }
-
-/* Tiquete confirmado */
-.tiqueteCard { padding: 36px 28px; text-align: center; }
-.tiqueteCard:hover { transform: none; }
-.tiqueteHeader { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 24px; }
-.tiqueteHeader h2 { font-size: 1.4rem; }
-.tiqueteHeader p { color: var(--text-secondary); font-size: 0.88rem; }
-
-.codigoWrap {
+/* Asientos */
+.seatSection {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.sectionHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.sectionHeader h2 { font-size: 0.95rem; font-weight: 700; }
+.countBadge {
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--text-secondary);
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 16px; margin-bottom: 20px;
+  padding: 3px 10px; border-radius: 100px;
 }
-.codigoLabel { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; }
-.codigo { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.14em; color: var(--text-primary); }
 
-.tiqueteInfo { text-align: left; display: flex; flex-direction: column; gap: 10px; }
-.tiqueteRow { display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; }
+/* Resumen */
+.resumen { position: sticky; top: 80px; }
+.resumenCard { padding: 18px; }
+.resumenCard:hover { transform: none; }
+
+.resumenHeader { margin-bottom: 4px; }
+.resumenTitle { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+.resumenMeta { display: flex; flex-direction: column; gap: 6px; }
+.resumenMeta span {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; color: var(--text-secondary);
+}
+
+/* Asientos seleccionados */
+.asientosSelec { padding: 2px 0; }
+.asientosLabel { font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+.asientosEmpty { font-size: 0.8rem; color: var(--text-muted); }
+.asientosPills { display: flex; flex-wrap: wrap; gap: 4px; }
+.asientoPill {
+  padding: 2px 8px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+/* Total */
+.totalRow { display: flex; justify-content: space-between; align-items: baseline; }
+.totalLabel { font-size: 0.82rem; color: var(--text-secondary); }
+.totalVal { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+
+.btnComprar { width: 100%; padding: 11px; margin-top: 14px; font-size: 0.88rem; }
+
+/* ── Tiquete confirmado ── */
+.confirmMain {
+  padding-top: 80px; padding-bottom: 60px;
+  min-height: 100vh;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+
+.tiqueteCard { padding: 28px; }
+.tiqueteCard:hover { transform: none; }
+
+.tiqueteHeader {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 4px;
+}
+.tiqueteTitle { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+.tiqueteSub { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* QR horizontal — imagen + código lado a lado */
+.qrSection {
+  display: flex; align-items: center; gap: 20px;
+  padding: 4px 0;
+}
+.qrBox {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.codigoWrap {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.codigoLabel {
+  font-size: 0.68rem; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.codigo {
+  font-family: 'Courier New', monospace;
+  font-size: 1.4rem; font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  line-height: 1;
+}
+.btnDescargar { padding: 6px 12px; font-size: 0.76rem; margin-top: 2px; }
+
+/* Detalles del tiquete */
+.tiqueteInfo { display: flex; flex-direction: column; gap: 10px; }
+.tiqueteRow {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.84rem;
+}
 .tiqueteRow span { color: var(--text-secondary); }
-.tiqueteRow strong { color: var(--text-primary); text-align: right; max-width: 55%; }
+.tiqueteRow strong { color: var(--text-primary); text-align: right; max-width: 60%; }
 
-@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .resumen { position: static; } }
+.tiqueteActions { display: flex; gap: 10px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .resumen { position: static; }
+}
+@media (max-width: 480px) {
+  .qrSection { flex-direction: column; align-items: flex-start; }
+  .tiqueteCard { padding: 20px; }
+}

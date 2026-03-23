@@ -22,9 +22,8 @@ export default function Compra() {
     Promise.all([
       api.get(`/funciones/pelicula/all`).catch(() => ({ data: [] })),
       api.get(`/funciones/${funcionId}/asientos`)
-    ]).then(([_, a]) => {
-      setAsientos(a.data);
-    }).catch(console.error)
+    ]).then(([_, a]) => setAsientos(a.data))
+      .catch(console.error)
       .finally(() => setCargando(false));
 
     api.get('/funciones').then(r => {
@@ -33,16 +32,12 @@ export default function Compra() {
     });
   }, [funcionId]);
 
-  const toggleAsiento = (id) => {
-    setSeleccionados(prev =>
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    );
-  };
+  const toggleAsiento = (id) =>
+    setSeleccionados(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
 
   const handleComprar = async () => {
-    if (seleccionados.length === 0) return;
-    setComprando(true);
-    setError('');
+    if (!seleccionados.length) return;
+    setComprando(true); setError('');
     try {
       const { data } = await api.post('/tiquetes/comprar', {
         funcion_id: parseInt(funcionId),
@@ -51,9 +46,7 @@ export default function Compra() {
       setTiquete(data.tiquete);
     } catch (err) {
       setError(err.response?.data?.mensaje || 'Error al procesar la compra');
-    } finally {
-      setComprando(false);
-    }
+    } finally { setComprando(false); }
   };
 
   const total = funcion ? seleccionados.length * parseFloat(funcion.precio) : 0;
@@ -62,7 +55,7 @@ export default function Compra() {
 
   if (cargando) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
+      <div className="spinner" style={{ width: 32, height: 32 }} />
     </div>
   );
 
@@ -70,32 +63,42 @@ export default function Compra() {
     <main className={styles.main}>
       <div className="container">
         <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}>
-          <ArrowLeft size={16} /> Volver
+          <ArrowLeft size={15} /> Volver
         </button>
 
         <div className={styles.layout}>
+          {/* Asientos */}
           <div className={styles.seatSection}>
             <div className={styles.sectionHeader}>
               <h2>Selecciona tus asientos</h2>
-              <span className="badge badge-gold">{seleccionados.length} seleccionados</span>
+              {seleccionados.length > 0 && (
+                <span className={styles.countBadge}>{seleccionados.length} seleccionado{seleccionados.length > 1 ? 's' : ''}</span>
+              )}
             </div>
             <SeatGrid asientos={asientos} seleccionados={seleccionados} onToggle={toggleAsiento} />
           </div>
 
-          <div className={styles.resumen}>
-            {funcion && (
+          {/* Resumen */}
+          {funcion && (
+            <div className={styles.resumen}>
               <div className={`card ${styles.resumenCard}`}>
-                <h3 className={styles.resumenTitle}>{funcion.titulo}</h3>
-                <div className={styles.resumenMeta}>
-                  <div className={styles.resumenItem}><Calendar size={14} /><span>{formatFecha(funcion.fecha)}</span></div>
-                  <div className={styles.resumenItem}><Clock size={14} /><span>{funcion.hora?.slice(0, 5)}</span></div>
-                  <div className={styles.resumenItem}><MapPin size={14} /><span>{funcion.sala}</span></div>
+                {/* Info función */}
+                <div className={styles.resumenHeader}>
+                  <h3 className={styles.resumenTitle}>{funcion.titulo}</h3>
+                  <div className={styles.resumenMeta}>
+                    <span><Calendar size={13} /> {formatFecha(funcion.fecha)}</span>
+                    <span><Clock size={13} /> {funcion.hora?.slice(0, 5)}</span>
+                    <span><MapPin size={13} /> {funcion.sala}</span>
+                  </div>
                 </div>
+
                 <hr className="divider" />
+
+                {/* Asientos seleccionados */}
                 <div className={styles.asientosSelec}>
-                  <p className="label">Asientos seleccionados</p>
+                  <p className={styles.asientosLabel}>Asientos</p>
                   {seleccionados.length === 0 ? (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Ninguno aún</p>
+                    <p className={styles.asientosEmpty}>Ninguno seleccionado</p>
                   ) : (
                     <div className={styles.asientosPills}>
                       {seleccionados.map(id => {
@@ -105,22 +108,30 @@ export default function Compra() {
                     </div>
                   )}
                 </div>
+
                 <hr className="divider" />
+
+                {/* Total */}
                 <div className={styles.totalRow}>
-                  <span>Total</span>
+                  <span className={styles.totalLabel}>Total</span>
                   <span className={styles.totalVal}>${total.toLocaleString('es-CO')}</span>
                 </div>
+
                 {error && <p className="error-msg" style={{ marginTop: 12 }}>{error}</p>}
+
                 <button
                   className={`btn btn-primary ${styles.btnComprar}`}
-                  disabled={seleccionados.length === 0 || comprando}
+                  disabled={!seleccionados.length || comprando}
                   onClick={handleComprar}
                 >
-                  {comprando ? <><div className="spinner" /> Procesando...</> : <><Ticket size={16} /> Confirmar compra</>}
+                  {comprando
+                    ? <><div className="spinner" /> Procesando...</>
+                    : <><Ticket size={15} /> Confirmar compra</>
+                  }
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </main>
@@ -128,8 +139,6 @@ export default function Compra() {
 }
 
 function TiqueteConfirmado({ tiquete, navigate }) {
-  const qrValue = tiquete.codigo;
-
   const handleDescargar = () => {
     const svg = document.getElementById('qr-tiquete');
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -138,7 +147,7 @@ function TiqueteConfirmado({ tiquete, navigate }) {
     const ctx = canvas.getContext('2d');
     const img = new Image();
     img.onload = () => {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, 300, 300);
       ctx.drawImage(img, 0, 0, 300, 300);
       const a = document.createElement('a');
@@ -150,50 +159,68 @@ function TiqueteConfirmado({ tiquete, navigate }) {
   };
 
   return (
-    <main style={{ paddingTop: 64, minHeight: '100vh', display: 'flex', alignItems: 'center', padding: '80px 16px 40px' }}>
-      <div className="container" style={{ maxWidth: 520 }}>
+    <main className={styles.confirmMain}>
+      <div className="container" style={{ maxWidth: 480 }}>
         <div className={`card ${styles.tiqueteCard}`}>
+
+          {/* Header */}
           <div className={styles.tiqueteHeader}>
-            <CheckCircle size={48} color="var(--green)" strokeWidth={1.5} />
-            <h2>¡Compra exitosa!</h2>
-            <p>Presenta este QR en la entrada</p>
+            <CheckCircle size={40} color="var(--green)" strokeWidth={1.5} />
+            <div>
+              <h2 className={styles.tiqueteTitle}>¡Compra exitosa!</h2>
+              <p className={styles.tiqueteSub}>Presenta el QR o el código en la entrada</p>
+            </div>
           </div>
 
-          {/* QR CODE */}
-          <div className={styles.qrWrap}>
+          <hr className="divider" />
+
+          {/* QR */}
+          <div className={styles.qrSection}>
             <div className={styles.qrBox}>
               <QRCodeSVG
                 id="qr-tiquete"
-                value={qrValue}
-                size={180}
+                value={tiquete.codigo}
+                size={160}
                 bgColor="#ffffff"
-                fgColor="#080b10"
+                fgColor="#0a0a0a"
                 level="H"
                 includeMargin={true}
               />
             </div>
-            <button className={`btn btn-ghost ${styles.btnDescargar}`} onClick={handleDescargar}>
-              <Download size={14} /> Descargar QR
-            </button>
+            <div className={styles.codigoWrap}>
+              <span className={styles.codigoLabel}>Código de acceso</span>
+              <span className={styles.codigo}>{tiquete.codigo}</span>
+              <button className={`btn btn-ghost ${styles.btnDescargar}`} onClick={handleDescargar}>
+                <Download size={13} /> Descargar QR
+              </button>
+            </div>
           </div>
 
-          <div className={styles.codigoWrap}>
-            <span className={styles.codigoLabel}>CÓDIGO DE ACCESO</span>
-            <div className={styles.codigo}>{tiquete.codigo}</div>
-          </div>
+          <hr className="divider" />
 
+          {/* Detalles */}
           <div className={styles.tiqueteInfo}>
-            <div className={styles.tiqueteRow}><span>Película</span><strong>{tiquete.funcion?.titulo}</strong></div>
-            <div className={styles.tiqueteRow}><span>Fecha</span><strong>{formatFecha(tiquete.funcion?.fecha)}</strong></div>
-            <div className={styles.tiqueteRow}><span>Hora</span><strong>{tiquete.funcion?.hora?.slice(0, 5)}</strong></div>
-            <div className={styles.tiqueteRow}><span>Sala</span><strong>{tiquete.funcion?.sala}</strong></div>
-            <div className={styles.tiqueteRow}><span>Asientos</span><strong>{tiquete.asientos?.map(a => `${a.fila}${a.columna}`).join(', ')}</strong></div>
-            <div className={styles.tiqueteRow}><span>Total</span><strong style={{ color: 'var(--accent)' }}>${Number(tiquete.total).toLocaleString('es-CO')}</strong></div>
+            {[
+              ['Película', tiquete.funcion?.titulo],
+              ['Fecha', formatFecha(tiquete.funcion?.fecha)],
+              ['Hora', tiquete.funcion?.hora?.slice(0, 5)],
+              ['Sala', tiquete.funcion?.sala],
+              ['Asientos', tiquete.asientos?.map(a => `${a.fila}${a.columna}`).join(', ')],
+              ['Total', `$${Number(tiquete.total).toLocaleString('es-CO')}`],
+            ].map(([label, value]) => (
+              <div key={label} className={styles.tiqueteRow}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
           </div>
 
-          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+          <hr className="divider" />
+
+          {/* Acciones */}
+          <div className={styles.tiqueteActions}>
             <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => navigate('/mis-tiquetes')}>
-              <Ticket size={15} /> Mis tiquetes
+              Mis tiquetes
             </button>
             <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => navigate('/')}>
               Ver cartelera

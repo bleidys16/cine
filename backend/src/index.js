@@ -42,3 +42,4 @@ app.get('/api/health', (_, res) => res.json({ estado: 'OK', timestamp: new Date(
 app.listen(PORT, () => {
   console.log(`🎬 Servidor CineApp corriendo en puerto ${PORT}`);
 });
+// force deploy Mon Mar 23 01:20:31 UTC 2026

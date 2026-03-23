@@ -36,8 +36,7 @@ export default function Home() {
         <div className={styles.heroOverlay} />
         <div className="container">
           <div className={styles.heroContent}>
-            <div className={styles.heroTag}><Film size={13} /> Cartelera 2026</div>
-            <h1 className={styles.heroTitle}>
+<h1 className={styles.heroTitle}>
               Vive la magia<br />del <span className={styles.heroAccent}>cine</span>
             </h1>
             <p className={styles.heroSub}>

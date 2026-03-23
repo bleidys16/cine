@@ -38,7 +38,7 @@
 
 .funcionInfo { display: flex; flex-direction: column; gap: 6px; }
 .funcionFecha { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); text-transform: capitalize; }
-.funcionHora { font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); line-height: 1; letter-spacing: -0.02em; }
+.funcionHora { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
 .funcionMeta { display: flex; gap: 6px; }
 
 .funcionRight { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }

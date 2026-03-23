@@ -127,7 +127,7 @@ export default function AdminFunciones() {
                   <td><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Calendar size={13} style={{ color: 'var(--text-muted)' }} />{formatFecha(f.fecha, { month: 'short' })}</span></td>
                   <td><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={13} style={{ color: 'var(--text-muted)' }} />{f.hora?.slice(0, 5)}</span></td>
                   <td>{f.sala}</td>
-                  <td style={{ color: 'var(--gold)', fontWeight: 600 }}>${Number(f.precio).toLocaleString('es-CO')}</td>
+                  <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>${Number(f.precio).toLocaleString('es-CO')}</td>
                   <td><span className={`badge ${estadoBadge(f.estado)}`}>{f.estado}</span></td>
                   <td><button className="btn btn-ghost" style={{ padding: '6px 10px' }} onClick={() => handleEdit(f)}><Pencil size={14} /></button></td>
                 </tr>

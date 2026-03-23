@@ -23,7 +23,7 @@
 .table td { padding: 12px 18px; font-size: 0.86rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
 .table tr:last-child td { border-bottom: none; }
 .table tbody tr:hover td { background: var(--bg-elevated); }
-.money { color: var(--gold) !important; font-weight: 600; }
+.money { color: var(--text-primary) !important; font-weight: 600; }
 
 .funcList { }
 .funcItem { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; }
@@ -33,7 +33,7 @@
 .funcFecha { font-size: 0.76rem; color: var(--text-muted); }
 .funcBar { display: flex; align-items: center; gap: 8px; }
 .barTrack { flex: 1; height: 5px; background: var(--bg-overlay); border-radius: 3px; overflow: hidden; }
-.barFill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.6s ease; }
-.barLabel { font-size: 0.76rem; font-weight: 700; color: var(--gold); width: 36px; text-align: right; }
+.barFill { height: 100%; background: var(--text-secondary); border-radius: 3px; transition: width 0.6s ease; }
+.barLabel { font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); width: 36px; text-align: right; }
 
 @media (max-width: 900px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } .grid2 { grid-template-columns: 1fr; } }

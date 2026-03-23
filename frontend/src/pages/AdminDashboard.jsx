@@ -50,7 +50,7 @@ export default function AdminDashboard() {
               {data?.ventas_recientes?.map((v, i) => (
                 <tr key={i}>
                   <td>{formatFecha(v.dia, { month: 'short' })}</td>
-                  <td><span className="badge badge-gold">{v.cantidad}</span></td>
+                  <td><span className="badge badge-gray">{v.cantidad}</span></td>
                   <td className={styles.money}>${Number(v.total).toLocaleString('es-CO')}</td>
                 </tr>
               ))}
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
                 <tr key={i}>
                   <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
                   <td><strong>{p.titulo}</strong></td>
-                  <td><span className="badge badge-gold">{p.ventas}</span></td>
+                  <td><span className="badge badge-gray">{p.ventas}</span></td>
                   <td className={styles.money}>${Number(p.ingresos).toLocaleString('es-CO')}</td>
                 </tr>
               ))}

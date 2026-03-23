@@ -49,7 +49,7 @@ export default function DetallePelicula() {
             <img src={getImg(pelicula.imagen_url)} alt={pelicula.titulo} onError={e => e.target.src = `https://placehold.co/300x450/111111/c9a84c?text=${encodeURIComponent(pelicula.titulo.slice(0,10))}`} />
           </div>
           <div className={styles.details}>
-            <span className="badge badge-gold">{pelicula.clasificacion}</span>
+            <span className="badge badge-gray">{pelicula.clasificacion}</span>
             <h1 className={styles.titulo}>{pelicula.titulo}</h1>
             <div className={styles.meta}>
               <span className="tag"><Clock size={12} /> {pelicula.duracion} min</span>

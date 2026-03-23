@@ -89,3 +89,18 @@
   .authButtons .btn { width: 100%; }
   .userMenu { justify-content: space-between; }
 }
+
+/* Preventa link especial */
+.linkPreventa {
+  color: var(--gold) !important;
+  background: var(--gold-subtle) !important;
+  border: 1px solid var(--gold-border) !important;
+}
+.linkPreventa:hover {
+  background: rgba(201,168,76,0.2) !important;
+}
+.activePreventa {
+  color: #000 !important;
+  background: var(--gold) !important;
+  border-color: var(--gold) !important;
+}

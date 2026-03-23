@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, Search, Ticket } from 'lucide-react';
+import { Film, Search } from 'lucide-react';
 import api from '../services/api';
 import PeliculaCard from '../components/PeliculaCard';
 import HeroPosterGrid from '../components/HeroPosterGrid';
@@ -20,15 +20,14 @@ export default function Home() {
       .finally(() => setCargando(false));
   }, []);
 
-  const filtradas = peliculas.filter(p => {
+  // Solo películas activas en cartelera (sin preventa)
+  const enCartelera = peliculas.filter(p => p.estado === 'activa');
+
+  const filtradas = enCartelera.filter(p => {
     const matchBusq = p.titulo.toLowerCase().includes(busqueda.toLowerCase());
     const matchGenero = genero === 'Todos' || p.genero === genero;
     return matchBusq && matchGenero;
   });
-
-  // Separar preventa de cartelera normal
-  const enPreventa = filtradas.filter(p => p.estado === 'preventa');
-  const enCartelera = filtradas.filter(p => p.estado !== 'preventa');
 
   return (
     <main className={styles.main}>
@@ -42,7 +41,7 @@ export default function Home() {
               Vive la magia<br />del <span className={styles.heroAccent}>cine</span>
             </h1>
             <p className={styles.heroSub}>
-              Selecciona tu película, elige tu asiento y disfruta<br />de la mejor experiencia cinematográfica.
+              Selecciona tu película, elige tu asiento y disfruta de la mejor experiencia cinematográfica.
             </p>
           </div>
         </div>
@@ -82,42 +81,20 @@ export default function Home() {
               <p>No hay películas disponibles</p>
             </div>
           ) : (
-            <>
-              {/* Sección Preventa */}
-              {enPreventa.length > 0 && (
-                <div className={styles.preventaSection}>
-                  <div className={styles.preventaHeader}>
-                    <span className={styles.preventaBadge}><Ticket size={11} /> Preventa</span>
-                    <h2 className={styles.preventaTitle}>Próximamente en cines</h2>
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>En cartelera</h2>
+                <div className={styles.sectionLine} />
+                <span className={styles.sectionCount}>{filtradas.length} películas</span>
+              </div>
+              <div className={styles.cards}>
+                {filtradas.map((p, i) => (
+                  <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                    <PeliculaCard pelicula={p} />
                   </div>
-                  <div className={styles.cards}>
-                    {enPreventa.map((p, i) => (
-                      <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                        <PeliculaCard pelicula={p} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Cartelera normal */}
-              {enCartelera.length > 0 && (
-                <div className={styles.section}>
-                  <div className={styles.sectionHeader}>
-                    <h2 className={styles.sectionTitle}>En cartelera</h2>
-                    <div className={styles.sectionLine} />
-                    <span className={styles.sectionCount}>{enCartelera.length} películas</span>
-                  </div>
-                  <div className={styles.cards}>
-                    {enCartelera.map((p, i) => (
-                      <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                        <PeliculaCard pelicula={p} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </section>

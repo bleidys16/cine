@@ -6,6 +6,7 @@ import DetallePelicula from './pages/DetallePelicula';
 import Compra from './pages/Compra';
 import { Login, Registro } from './pages/Auth';
 import MisTiquetes from './pages/MisTiquetes';
+import Preventa from './pages/Preventa';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPeliculas from './pages/AdminPeliculas';
@@ -24,6 +25,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/pelicula/:id" element={<DetallePelicula />} />
+        <Route path="/preventa" element={<Preventa />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/comprar/:funcionId" element={<ProtectedRoute><Compra /></ProtectedRoute>} />

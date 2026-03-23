@@ -1,0 +1,90 @@
+.main { padding-top: 60px; min-height: 100vh; padding-bottom: 80px; }
+
+.header {
+  padding: 48px 0 40px;
+  background: linear-gradient(180deg, rgba(201,168,76,0.06) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.headerContent { max-width: 600px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px;
+  background: var(--gold);
+  color: #000;
+  font-size: 0.75rem; font-weight: 800;
+  border-radius: 4px; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800; letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.sub { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65; max-width: 480px; }
+
+.loading, .empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px;
+  min-height: 320px; color: var(--text-muted); text-align: center;
+}
+.empty h3 { font-size: 1.2rem; color: var(--text-secondary); }
+.empty p { font-size: 0.88rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.card { display: flex; flex-direction: column; }
+.card:hover { transform: translateY(-4px); border-color: var(--gold-border); }
+
+.imgWrap {
+  position: relative;
+  width: 100%; padding-top: 56%; /* 16:9 para preventa — más cinemático */
+  overflow: hidden; background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+.img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+.card:hover .img { transform: scale(1.04); }
+.imgOverlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 60%);
+}
+.clasificacion {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.8); color: var(--gold-light);
+  font-size: 0.68rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 4px;
+  border: 1px solid var(--gold-border);
+}
+.preventaBadge {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--gold); color: #000;
+  font-size: 0.65rem; font-weight: 800;
+  padding: 3px 9px; border-radius: 4px;
+  display: flex; align-items: center; gap: 4px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+.body { padding: 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.genrePill {
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.titulo { font-size: 1.2rem; font-weight: 700; line-height: 1.3; }
+.desc {
+  font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  flex: 1;
+}
+.meta { display: flex; gap: 8px; }
+.cta { margin-top: 4px; justify-content: center; padding: 12px; }
+
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
+  .header { padding: 32px 0 28px; }
+}

@@ -10,7 +10,7 @@
 .stat_purple .statIcon { background: rgba(168,85,247,0.12); color: #c084fc; }
 .stat_green .statIcon { background: var(--green-bg); color: var(--green); }
 .statLabel { font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 3px; font-weight: 500; }
-.statVal { font-family: 'Poppins', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.statVal {  font-size: 1.4rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .tableCard { padding: 0; }

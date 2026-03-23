@@ -26,7 +26,7 @@
 
 .totalRow { display: flex; justify-content: space-between; align-items: center; }
 .totalRow span { font-size: 0.85rem; color: var(--text-secondary); }
-.totalVal { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+.totalVal {  font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
 
 .btnComprar { width: 100%; padding: 12px; margin-top: 14px; font-size: 0.9rem; }
 

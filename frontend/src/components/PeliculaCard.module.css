@@ -1,67 +1,42 @@
-/* Card — altura 100% para que el grid las iguale */
 .card {
-  cursor: pointer;
-  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
   display: flex;
   flex-direction: column;
-  height: 100%; /* clave para igualar alturas */
+  height: 100%;
+  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+  text-decoration: none;
 }
 .card:hover {
   border-color: rgba(255,255,255,0.14);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5);
 }
 
-/* Imagen — ratio 2:3 fijo */
+/* ── Imagen ── */
 .imgWrap {
   position: relative;
   width: 100%;
-  padding-top: 150%;
+  padding-top: 150%; /* ratio 2:3 siempre */
   overflow: hidden;
   background: var(--bg-elevated);
   flex-shrink: 0;
 }
 .img {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 0.35s ease;
 }
-.card:hover .img { transform: scale(1.03); }
+.card:hover .img { transform: scale(1.04); }
 
+/* Overlay base — sutil */
 .overlay {
   position: absolute; inset: 0;
   background: linear-gradient(
     to top,
-    rgba(10,10,10,0.82) 0%,
-    rgba(10,10,10,0.08) 40%,
-    transparent 100%
+    rgba(10,10,10,0.7) 0%,
+    transparent 50%
   );
-}
-
-/* Clasificación — discreta, top right */
-.clasificacion {
-  position: absolute; top: 8px; right: 8px;
-  background: rgba(0,0,0,0.65);
-  color: rgba(255,255,255,0.7);
-  font-size: 0.6rem; font-weight: 600;
-  padding: 2px 5px; border-radius: 3px;
-  backdrop-filter: blur(4px);
-  letter-spacing: 0.03em;
-}
-
-/* Género — bottom left, tono neutro, no saturado */
-.genrePill {
-  position: absolute; bottom: 10px; left: 10px;
-  font-size: 0.62rem; font-weight: 600;
-  padding: 3px 8px; border-radius: 3px;
-  backdrop-filter: blur(10px);
-  /* Color por JS pero limitado a tonos oscuros/neutros */
-  background: rgba(0,0,0,0.55) !important;
-  color: rgba(255,255,255,0.85) !important;
-  border: none !important;
-  letter-spacing: 0.02em;
+  transition: opacity 0.3s;
 }
 
 /* Badge preventa */
@@ -73,75 +48,88 @@
   padding: 2px 7px; border-radius: 3px;
   display: flex; align-items: center; gap: 3px;
   text-transform: uppercase; letter-spacing: 0.04em;
+  z-index: 2;
 }
 
-/* Body — flex:1 para que todas tengan mismo alto */
+/* ── Info en hover ── */
+.hoverInfo {
+  position: absolute; inset: 0;
+  background: rgba(10,10,10,0.88);
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+.card:hover .hoverInfo { opacity: 1; }
+
+.hoverDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.hoverMeta {
+  display: flex; align-items: center;
+  justify-content: space-between;
+}
+.hoverGenre {
+  font-size: 0.68rem; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.hoverClasif {
+  font-size: 0.65rem; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.08);
+  padding: 2px 6px; border-radius: 3px;
+}
+
+/* ── Body — mínimo ── */
 .body {
-  padding: 12px 14px 14px;
+  padding: 11px 12px 13px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
   flex: 1;
-  gap: 4px;
 }
 
-/* Título — 2 líneas fijas */
 .titulo {
   font-size: 0.88rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.35;
   color: var(--text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(0.88rem * 1.4 * 2); /* exactamente 2 líneas */
 }
 
-/* Descripción — 2 líneas */
-.desc {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: calc(0.75rem * 1.5 * 2);
-  margin-top: 2px;
-}
-
-.meta {
-  display: flex; gap: 5px;
+/* Footer — duración + CTA en la misma línea */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: auto;
-  padding-top: 8px;
 }
 
-/* CTA — más discreto, no domina la card */
+.duracion {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
 .cta {
-  margin-top: 10px;
-  width: 100%;
-  justify-content: center;
-  padding: 8px 12px;
-  font-size: 0.8rem;
+  display: flex; align-items: center; gap: 3px;
+  font-size: 0.75rem;
   font-weight: 600;
-  /* Fondo semitransparente en vez de dorado sólido */
-  background: rgba(201, 168, 76, 0.12) !important;
-  color: var(--gold-light) !important;
-  border: 1px solid rgba(201, 168, 76, 0.2) !important;
+  color: var(--gold);
+  transition: color 0.15s;
 }
-.cta:hover:not(:disabled) {
-  background: rgba(201, 168, 76, 0.2) !important;
-  border-color: var(--gold) !important;
-  color: var(--gold-light) !important;
-  transform: none !important;
-}
-
-.ctaPreventa {
-  background: transparent !important;
-  color: var(--gold) !important;
-  border: 1px solid var(--gold-border) !important;
-}
-.ctaPreventa:hover:not(:disabled) {
-  background: rgba(201,168,76,0.08) !important;
-  border-color: var(--gold) !important;
-}
+.card:hover .cta { color: var(--gold-light); }

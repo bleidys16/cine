@@ -44,3 +44,6 @@
 /* Image preview */
 .imgPreview { margin: 4px 0 16px; }
 .imgPreview img { height: 120px; border-radius: var(--radius); border: 1px solid var(--border); }
+
+/* Estado preventa en tabla */
+.estadoPreventa { background: var(--gold-subtle); color: var(--gold); border: 1px solid var(--gold-border); }

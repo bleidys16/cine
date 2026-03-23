@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Clock, ChevronRight } from 'lucide-react';
+import { Clock, ChevronRight, Ticket } from 'lucide-react';
 import styles from './PeliculaCard.module.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -22,18 +22,28 @@ const getProxiedUrl = (url) => {
 const getFallback = (titulo) =>
   `https://placehold.co/300x450/111111/c9a84c?text=${encodeURIComponent(titulo.slice(0, 14))}`;
 
-export default function PeliculaCard({ pelicula, preventa = false }) {
+export default function PeliculaCard({ pelicula }) {
   const generoColor = GENERO_COLORS[pelicula.genero] || '#6b7280';
   const src = getProxiedUrl(pelicula.imagen_url) || getFallback(pelicula.titulo);
+  const esPreventa = pelicula.estado === 'preventa';
 
   return (
     <div className={`card card-hover ${styles.card}`}>
       <div className={styles.imgWrap}>
-        <img src={src} alt={pelicula.titulo} className={styles.img} loading="lazy"
-          onError={(e) => { if (!e.target.dataset.fallback) { e.target.dataset.fallback = 'true'; e.target.src = getFallback(pelicula.titulo); } }}
+        <img
+          src={src}
+          alt={pelicula.titulo}
+          className={styles.img}
+          loading="lazy"
+          onError={(e) => {
+            if (!e.target.dataset.fallback) {
+              e.target.dataset.fallback = 'true';
+              e.target.src = getFallback(pelicula.titulo);
+            }
+          }}
         />
         <div className={styles.overlay} />
-        {preventa && <span className={styles.badgePreventa}>Preventa</span>}
+        {esPreventa && <span className={styles.badgePreventa}><Ticket size={9} /> Preventa</span>}
         <span className={styles.clasificacion}>{pelicula.clasificacion}</span>
         <div className={styles.genrePill} style={{ background: `${generoColor}22`, color: generoColor, border: `1px solid ${generoColor}44` }}>
           {pelicula.genero}
@@ -45,8 +55,11 @@ export default function PeliculaCard({ pelicula, preventa = false }) {
         <div className={styles.meta}>
           <span className="tag"><Clock size={11} /> {pelicula.duracion} min</span>
         </div>
-        <Link to={`/pelicula/${pelicula.id}`} className={`btn btn-primary ${styles.cta} ${preventa ? styles.ctaPreventa : ''}`}>
-          {preventa ? 'Ver preventa' : 'Ver funciones'} <ChevronRight size={15} />
+        <Link
+          to={`/pelicula/${pelicula.id}`}
+          className={`btn btn-primary ${styles.cta} ${esPreventa ? styles.ctaPreventa : ''}`}
+        >
+          {esPreventa ? <><Ticket size={13} /> Comprar preventa</> : <>Ver funciones <ChevronRight size={13} /></>}
         </Link>
       </div>
     </div>

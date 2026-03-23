@@ -1,4 +1,4 @@
-/* Card — altura fija y uniforme en todo el grid */
+/* Card — altura uniforme en todo el grid */
 .card {
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
@@ -6,83 +6,106 @@
   flex-direction: column;
   height: 100%;
 }
-.card:hover { border-color: var(--border-strong); transform: translateY(-4px); }
+.card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
 
-/* Imagen siempre 2:3 */
+/* Imagen siempre 2:3 — nunca se deforma */
 .imgWrap {
   position: relative;
-  aspect-ratio: 2/3;
+  width: 100%;
+  padding-top: 150%; /* ratio 2:3 */
   overflow: hidden;
   background: var(--bg-elevated);
   flex-shrink: 0;
 }
-.img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
 .card:hover .img { transform: scale(1.04); }
-.overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.2) 50%, transparent 100%); }
+.overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.1) 50%, transparent 100%);
+}
 
 .clasificacion {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.75);
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.8);
   color: var(--gold-light);
-  font-size: 0.68rem; font-weight: 700;
-  padding: 3px 7px; border-radius: 4px;
+  font-size: 0.65rem; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px;
   border: 1px solid var(--gold-border);
   backdrop-filter: blur(4px);
 }
 .genrePill {
-  position: absolute; bottom: 12px; left: 10px;
-  font-size: 0.68rem; font-weight: 600;
-  padding: 3px 9px; border-radius: 100px;
+  position: absolute; bottom: 10px; left: 8px;
+  font-size: 0.65rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 100px;
   backdrop-filter: blur(8px);
 }
 
 /* Badge preventa */
 .badgePreventa {
-  position: absolute; top: 10px; left: 10px;
-  background: rgba(201, 168, 76, 0.9);
+  position: absolute; top: 8px; left: 8px;
+  background: var(--gold);
   color: #000;
-  font-size: 0.62rem; font-weight: 800;
-  padding: 3px 8px; border-radius: 4px;
+  font-size: 0.58rem; font-weight: 800;
+  padding: 2px 7px; border-radius: 3px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  backdrop-filter: blur(4px);
 }
 
-/* Body — flex grow para que todas tengan mismo alto */
+/* Body uniforme */
 .body {
-  padding: 14px 14px 16px;
+  padding: 12px 12px 14px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 6px;
+  gap: 5px;
 }
-/* Título — máximo 2 líneas, siempre igual altura */
+
+/* Título — siempre 2 líneas exactas */
 .titulo {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.4em;
+  height: 2.4em; /* altura fija = 2 líneas siempre */
 }
-/* Desc — siempre 2 líneas */
+
+/* Descripción — siempre 2 líneas exactas */
 .desc {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
+  height: 2.2em; /* altura fija = 2 líneas siempre */
 }
-.meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
-.cta { margin-top: 10px; width: 100%; justify-content: center; padding: 9px; font-size: 0.82rem; }
 
-/* CTA preventa */
+.meta {
+  display: flex; gap: 5px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.cta {
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+  padding: 8px;
+  font-size: 0.8rem;
+}
+
 .ctaPreventa {
   background: transparent;
   color: var(--gold);

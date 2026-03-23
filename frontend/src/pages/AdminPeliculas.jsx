@@ -156,6 +156,7 @@ export default function AdminPeliculas() {
                     <label className="label">Estado</label>
                     <select className="input" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
                       <option value="activa">Activa</option>
+                    <option value="preventa">Preventa</option>
                       <option value="inactiva">Inactiva</option>
                     </select>
                   </div>
@@ -199,7 +200,7 @@ export default function AdminPeliculas() {
                   <td>{p.genero || '—'}</td>
                   <td>{p.duracion} min</td>
                   <td>{p.clasificacion || '—'}</td>
-                  <td><span className={`badge ${p.estado === 'activa' ? 'badge-green' : 'badge-gray'}`}>{p.estado}</span></td>
+                  <td><span className={`badge ${p.estado === 'activa' ? 'badge-green' : p.estado === 'preventa' ? 'badge-gold' : 'badge-gray'}`}>{p.estado}</span></td>
                   <td>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="btn btn-ghost" style={{ padding: '6px 10px' }} onClick={() => handleEdit(p)}><Pencil size={14} /></button>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, Search } from 'lucide-react';
+import { Film, Search, Ticket } from 'lucide-react';
 import api from '../services/api';
 import PeliculaCard from '../components/PeliculaCard';
 import HeroPosterGrid from '../components/HeroPosterGrid';
@@ -26,9 +26,12 @@ export default function Home() {
     return matchBusq && matchGenero;
   });
 
+  // Separar preventa de cartelera normal
+  const enPreventa = filtradas.filter(p => p.estado === 'preventa');
+  const enCartelera = filtradas.filter(p => p.estado !== 'preventa');
+
   return (
     <main className={styles.main}>
-      {/* Hero con collage de posters */}
       <section className={styles.hero}>
         <HeroPosterGrid peliculas={peliculas} />
         <div className={styles.heroOverlay} />
@@ -45,7 +48,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Filtros */}
       <section className={styles.filters}>
         <div className="container">
           <div className={styles.filtersInner}>
@@ -60,18 +62,13 @@ export default function Home() {
             </div>
             <div className={styles.genreTabs}>
               {GENEROS.map(g => (
-                <button
-                  key={g}
-                  className={`${styles.genreTab} ${genero === g ? styles.active : ''}`}
-                  onClick={() => setGenero(g)}
-                >{g}</button>
+                <button key={g} className={`${styles.genreTab} ${genero === g ? styles.active : ''}`} onClick={() => setGenero(g)}>{g}</button>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Grid de películas */}
       <section className={styles.grid}>
         <div className="container">
           {cargando ? (
@@ -85,13 +82,42 @@ export default function Home() {
               <p>No hay películas disponibles</p>
             </div>
           ) : (
-            <div className={styles.cards}>
-              {filtradas.map((p, i) => (
-                <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                  <PeliculaCard pelicula={p} />
+            <>
+              {/* Sección Preventa */}
+              {enPreventa.length > 0 && (
+                <div className={styles.preventaSection}>
+                  <div className={styles.preventaHeader}>
+                    <span className={styles.preventaBadge}><Ticket size={11} /> Preventa</span>
+                    <h2 className={styles.preventaTitle}>Próximamente en cines</h2>
+                  </div>
+                  <div className={styles.cards}>
+                    {enPreventa.map((p, i) => (
+                      <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <PeliculaCard pelicula={p} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Cartelera normal */}
+              {enCartelera.length > 0 && (
+                <div className={styles.section}>
+                  <div className={styles.sectionHeader}>
+                    <h2 className={styles.sectionTitle}>En cartelera</h2>
+                    <div className={styles.sectionLine} />
+                    <span className={styles.sectionCount}>{enCartelera.length} películas</span>
+                  </div>
+                  <div className={styles.cards}>
+                    {enCartelera.map((p, i) => (
+                      <div key={p.id} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <PeliculaCard pelicula={p} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

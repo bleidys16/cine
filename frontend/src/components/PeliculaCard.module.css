@@ -92,11 +92,10 @@
 
 /* ── Body — mínimo ── */
 .body {
-  padding: 11px 12px 13px;
+  padding: 10px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  flex: 1;
+  gap: 5px;
 }
 
 .titulo {
@@ -110,26 +109,9 @@
   overflow: hidden;
 }
 
-/* Footer — duración + CTA en la misma línea */
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-}
-
 .duracion {
   display: flex; align-items: center; gap: 4px;
   font-size: 0.72rem;
   color: var(--text-muted);
   font-weight: 400;
 }
-
-.cta {
-  display: flex; align-items: center; gap: 3px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gold);
-  transition: color 0.15s;
-}
-.card:hover .cta { color: var(--gold-light); }

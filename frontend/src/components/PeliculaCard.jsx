@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Clock, ChevronRight, Ticket } from 'lucide-react';
+import { Clock, Ticket } from 'lucide-react';
 import styles from './PeliculaCard.module.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -22,7 +22,6 @@ export default function PeliculaCard({ pelicula }) {
 
   return (
     <Link to={`/pelicula/${pelicula.id}`} className={`card ${styles.card}`}>
-      {/* Poster */}
       <div className={styles.imgWrap}>
         <img
           src={src}
@@ -38,14 +37,13 @@ export default function PeliculaCard({ pelicula }) {
         />
         <div className={styles.overlay} />
 
-        {/* Badge solo si es preventa */}
         {esPreventa && (
           <span className={styles.badgePreventa}>
             <Ticket size={9} /> Preventa
           </span>
         )}
 
-        {/* Info en hover — aparece sobre la imagen */}
+        {/* Descripción aparece en hover */}
         <div className={styles.hoverInfo}>
           <p className={styles.hoverDesc}>{pelicula.descripcion}</p>
           <div className={styles.hoverMeta}>
@@ -55,17 +53,12 @@ export default function PeliculaCard({ pelicula }) {
         </div>
       </div>
 
-      {/* Body — mínimo */}
+      {/* Solo título y duración */}
       <div className={styles.body}>
         <h3 className={styles.titulo}>{pelicula.titulo}</h3>
-        <div className={styles.footer}>
-          <span className={styles.duracion}>
-            <Clock size={11} /> {pelicula.duracion} min
-          </span>
-          <span className={styles.cta}>
-            {esPreventa ? <><Ticket size={11} /> Preventa</> : <>Ver funciones <ChevronRight size={12} /></>}
-          </span>
-        </div>
+        <span className={styles.duracion}>
+          <Clock size={11} /> {pelicula.duracion} min
+        </span>
       </div>
     </Link>
   );

@@ -17,7 +17,7 @@ export const registrar = async (req, res) => {
     if (existe.length > 0)
       return res.status(409).json({ mensaje: 'El email ya está registrado' });
 
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(contrasena, 10);
     const { rows } = await pool.query(
       'INSERT INTO usuarios (nombre, email, contrasena) VALUES ($1, $2, $3) RETURNING id, nombre, email, rol',
       [nombre, email, hash]
@@ -42,9 +42,9 @@ export const registrar = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, contrasena } = req.body;
 
-  if (!email || !password)
+  if (!email || !contrasena)
     return res.status(400).json({ mensaje: 'Email y contraseña requeridos' });
 
   try {
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
 
     const usuario = rows[0];
-    const valido = await bcrypt.compare(password, usuario.contrasena);
+    const valido = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!valido)
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
 

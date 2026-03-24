@@ -80,7 +80,7 @@ export const comprar = async (req, res) => {
         [usuario_id]
       );
       if (userRows.length > 0) {
-        enviarTiquete({
+        await enviarTiquete({
           email: userRows[0].email,
           nombre: userRows[0].nombre,
           tiquete: tiqueteCompleto

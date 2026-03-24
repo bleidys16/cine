@@ -1,16 +1,23 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'CineApp <onboarding@resend.dev>';
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
+
+// Transportador Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS  // contraseña de aplicación, no tu password real
+  }
+});
 
 // ============================================
 // EMAIL: Bienvenida al registrarse
 // ============================================
 export const enviarBienvenida = async ({ nombre, email }) => {
   try {
-    await resend.emails.send({
-      from: FROM,
+    await transporter.sendMail({
+      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: '🎬 Bienvenido a CineApp',
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
@@ -38,7 +45,7 @@ export const enviarBienvenida = async ({ nombre, email }) => {
     });
     console.log(`✉️  Bienvenida enviada a ${email}`);
   } catch (err) {
-    console.error('Error enviando bienvenida:', err.message);
+    console.error('❌ Error enviando bienvenida:', err.message);
   }
 };
 
@@ -49,13 +56,15 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
   const { codigo, total, funcion, asientos } = tiquete;
   const asientosStr = asientos?.map(a => `${a.fila}${a.columna}`).join(', ') || '';
   const fechaFormateada = funcion?.fecha
-    ? new Date(funcion.fecha + 'T00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(funcion.fecha + 'T00:00').toLocaleDateString('es-CO', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      })
     : '';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=080b10&margin=10`;
 
   try {
-    await resend.emails.send({
-      from: FROM,
+    await transporter.sendMail({
+      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: `🎟️ Tu tiquete para ${funcion?.titulo || 'la función'} — ${codigo}`,
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
@@ -97,6 +106,6 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
     });
     console.log(`✉️  Tiquete enviado a ${email}`);
   } catch (err) {
-    console.error('Error enviando tiquete:', err.message);
+    console.error('❌ Error enviando tiquete:', err.message);
   }
 };

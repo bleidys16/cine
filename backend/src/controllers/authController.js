@@ -1,7 +1,7 @@
 import pool from '../db/connection.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { enviarBienvenida } from '../services/emailService.js'; // 👈 importar
+import { enviarBienvenida } from '../services/emailService.js';
 
 export const registrar = async (req, res) => {
   const { nombre, email, password } = req.body;
@@ -10,7 +10,6 @@ export const registrar = async (req, res) => {
     return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
 
   try {
-    // Verificar si el email ya existe
     const { rows: existe } = await pool.query(
       'SELECT id FROM usuarios WHERE email = $1',
       [email]
@@ -18,7 +17,6 @@ export const registrar = async (req, res) => {
     if (existe.length > 0)
       return res.status(409).json({ mensaje: 'El email ya está registrado' });
 
-    // Hashear contraseña y crear usuario
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await pool.query(
       'INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3) RETURNING id, nombre, email, rol',
@@ -26,10 +24,11 @@ export const registrar = async (req, res) => {
     );
     const usuario = rows[0];
 
-    // ✅ Enviar email de bienvenida
-    await enviarBienvenida({ nombre: usuario.nombre, email: usuario.email });
+    // ✅ Email en segundo plano — si falla no rompe el registro
+    enviarBienvenida({ nombre: usuario.nombre, email: usuario.email }).catch(err =>
+      console.error('Error email bienvenida:', err.message)
+    );
 
-    // Generar token
     const token = jwt.sign(
       { id: usuario.id, rol: usuario.rol },
       process.env.JWT_SECRET,

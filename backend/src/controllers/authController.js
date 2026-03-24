@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import { enviarBienvenida } from '../services/emailService.js';
 
 export const registrar = async (req, res) => {
-  const { nombre, email, password } = req.body;
+  const { nombre, email, contrasena } = req.body;
 
-  if (!nombre || !email || !password)
+  if (!nombre || !email || !contrasena)
     return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
 
   try {

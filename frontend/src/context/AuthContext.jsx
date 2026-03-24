@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, contrasena) => {
     setCargando(true);
     try {
-      const { data } = await api.post('/auth/login', { email, password: contrasena });
+      const { data } = await api.post('/auth/login', { email, contrasena });
       localStorage.setItem('token', data.token);
       localStorage.setItem('usuario', JSON.stringify(data.usuario));
       setUsuario(data.usuario);
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   const registrar = async (nombre, email, contrasena) => {
     setCargando(true);
     try {
-      const { data } = await api.post('/auth/registrar', { nombre, email, password: contrasena });
+      const { data } = await api.post('/auth/registrar', { nombre, email, contrasena });
       localStorage.setItem('token', data.token);
       localStorage.setItem('usuario', JSON.stringify(data.usuario));
       setUsuario(data.usuario);

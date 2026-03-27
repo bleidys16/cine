@@ -6,8 +6,9 @@ const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  requireTLS: true,
   family: 4, // Fuerza el uso de IPv4 para evitar el error ENETUNREACH en Render
   auth: {
     user: process.env.GMAIL_USER,

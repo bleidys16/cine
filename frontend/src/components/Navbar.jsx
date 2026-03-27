@@ -28,7 +28,7 @@ export default function Navbar() {
           <Link to="/preventa" className={`${styles.link} ${styles.linkPreventa} ${isActive('/preventa') ? styles.activePreventa : ''}`} onClick={() => setMenuOpen(false)}>
             <Star size={13} /> Preventa
           </Link>
-          {usuario && (
+          {usuario && usuario.rol !== 'admin' && (
             <Link to="/mis-tiquetes" className={`${styles.link} ${isActive('/mis-tiquetes') ? styles.active : ''}`} onClick={() => setMenuOpen(false)}>
               <Ticket size={14} /> Mis Tiquetes
             </Link>

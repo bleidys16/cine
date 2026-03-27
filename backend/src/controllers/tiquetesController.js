@@ -72,9 +72,9 @@ export const comprar = async (req, res) => {
       WHERE f.id = $1
     `, [funcion_id]);
 
-    const tiqueteCompleto = { ...tiquete, asientos: detalles, funcion: funcDetalle[0] };
+    const tiqueteCompleto = { ...tiquete, estado: 'pendiente', asientos: detalles, funcion: funcDetalle[0] };
 
-    // El correo ya no se envía aquí, se enviará al confirmar por el admin
+    // NOTA: El correo NO se envía aquí. Se envía cuando el admin lo aprueba en confirmarTiquete.
     res.status(201).json({ tiquete: tiqueteCompleto });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -209,7 +209,10 @@ export const listarMios = async (req, res) => {
       GROUP BY t.id, p.titulo, f.fecha, f.hora, f.sala
       ORDER BY t.fecha_compra DESC
     `, [req.usuario.id]);
-    res.json(rows);
+    res.json(rows.map(t => {
+      if (t.codigo.startsWith('PEND-')) t.estado = 'pendiente';
+      return t;
+    }));
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener tiquetes', error: err.message });
   }

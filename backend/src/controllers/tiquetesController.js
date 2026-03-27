@@ -36,11 +36,11 @@ export const comprar = async (req, res) => {
 
     const precio = parseFloat(funcRows[0].precio);
     const total = precio * asientos_ids.length;
-    const codigo = nanoid(10).toUpperCase();
+    const codigo = 'PEND-' + nanoid(5).toUpperCase();
 
-    // Guardar el tiquete como 'pendiente'
+    // Guardar el tiquete con el prefijo PEND- para evitar errores de restricción de base de datos
     const { rows: tiqRows } = await client.query(
-      "INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total, estado) VALUES ($1,$2,$3,$4,'pendiente') RETURNING *",
+      "INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total) VALUES ($1,$2,$3,$4) RETURNING *",
       [codigo, usuario_id, funcion_id, total]
     );
     const tiquete = tiqRows[0];
@@ -95,7 +95,7 @@ export const listarPendientes = async (req, res) => {
       JOIN peliculas p ON p.id = f.pelicula_id
       JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
       JOIN asientos a ON a.id = dt.asiento_id
-      WHERE t.estado = 'pendiente'
+      WHERE t.codigo LIKE 'PEND-%' AND t.estado != 'cancelado'
       GROUP BY t.id, u.nombre, u.email, p.titulo, f.fecha, f.hora, f.sala
       ORDER BY t.fecha_compra ASC
     `);
@@ -108,8 +108,18 @@ export const listarPendientes = async (req, res) => {
 export const confirmarTiquete = async (req, res) => {
   const { id } = req.params;
   try {
-    const { rows: tiqRows } = await pool.query("UPDATE tiquetes SET estado='valido' WHERE id=$1 RETURNING *", [id]);
-    if (tiqRows.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    // Primero obtenemos el tiquete para saber su código actual
+    const { rows: tiqPre } = await pool.query("SELECT codigo FROM tiquetes WHERE id=$1", [id]);
+    if (tiqPre.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    
+    // Le quitamos el PEND- al código
+    const nuevoCodigo = tiqPre[0].codigo.startsWith('PEND-') ? tiqPre[0].codigo.replace('PEND-', '') + nanoid(5).toUpperCase() : tiqPre[0].codigo;
+    // Nos aseguramos de que mida 10 caracteres. Si quitamos PEND-, quedan 5. Añadimos 5 randoms al final.
+
+    const { rows: tiqRows } = await pool.query(
+      "UPDATE tiquetes SET codigo=$1, estado='valido' WHERE id=$2 RETURNING *", 
+      [nuevoCodigo, id]
+    );
     const tiquete = tiqRows[0];
 
     const { rows: detalles } = await pool.query(`
@@ -171,12 +181,12 @@ export const validar = async (req, res) => {
       return res.status(404).json({ valido: false, estado: 'invalido', mensaje: 'Código no encontrado' });
 
     const tiquete = rows[0];
+    if (tiquete.codigo.startsWith('PEND-'))
+      return res.json({ valido: false, estado: 'pendiente', mensaje: 'Tiquete pendiente de confirmación administrativa', tiquete });
     if (tiquete.estado === 'usado')
       return res.json({ valido: false, estado: 'usado', mensaje: 'Tiquete ya fue utilizado', tiquete });
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
-    if (tiquete.estado === 'pendiente')
-      return res.json({ valido: false, estado: 'pendiente', mensaje: 'Tiquete pendiente de confirmación', tiquete });
 
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
     res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });
@@ -210,7 +220,7 @@ export const dashboard = async (req, res) => {
     const [ventas, ocupacion, populares] = await Promise.all([
       pool.query(`
         SELECT DATE(fecha_compra) as dia, COUNT(*) as cantidad, SUM(total) as total
-        FROM tiquetes WHERE estado != 'cancelado' AND estado != 'pendiente'
+        FROM tiquetes WHERE estado != 'cancelado' AND codigo NOT LIKE 'PEND-%'
         GROUP BY dia ORDER BY dia DESC LIMIT 7
       `),
       pool.query(`
@@ -230,7 +240,7 @@ export const dashboard = async (req, res) => {
         FROM tiquetes t
         JOIN funciones f ON f.id = t.funcion_id
         JOIN peliculas p ON p.id = f.pelicula_id
-        WHERE t.estado != 'cancelado' AND t.estado != 'pendiente'
+        WHERE t.estado != 'cancelado' AND t.codigo NOT LIKE 'PEND-%'
         GROUP BY p.titulo ORDER BY ventas DESC LIMIT 5
       `)
     ]);

@@ -1,24 +1,41 @@
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
-const SENDER_EMAIL = process.env.GMAIL_USER || 'lariosbleidys@gmail.com'; // Debe coincidir con tu correo registrado en Brevo
+const SENDER_EMAIL = process.env.GMAIL_USER || 'lariosbleidys@gmail.com'; // Debe coincidir con correo de Brevo
 
 // Función genérica para enviar correos usando la API web de Brevo (bypasses Render 465/587 blocks)
 const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
+  if (!process.env.BREVO_API_KEY) {
+    console.log(`⚠️ BREVO_API_KEY no configurada. Simulando envío a ${toEmail}`);
+    return { success: true };
+  }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: 'CineApp', email: SENDER_EMAIL },
+      to: [{ email: toEmail }],
+      subject: subject,
+      htmlContent: htmlContent
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Brevo HTTP Error: ${response.status} - ${err}`);
+  }
+  return await response.json();
+};
 
 // ============================================
 // EMAIL: Bienvenida al registrarse
 // ============================================
 export const enviarBienvenida = async ({ nombre, email }) => {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('⚠️ RESEND_API_KEY no configurada. Simulando envío de bienvenida a', email);
-    return { success: true };
-  }
-
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: '🎬 Bienvenido a CineApp',
-      html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+    const htmlBienvenida = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
       <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Inter',sans-serif;">
         <div style="max-width:520px;margin:0 auto;padding:40px 20px;">
           <div style="margin-bottom:28px;">
@@ -36,12 +53,13 @@ export const enviarBienvenida = async ({ nombre, email }) => {
           </div>
           <p style="text-align:center;color:#444;font-size:0.74rem;margin-top:20px;">CineApp · SENA CNCA Nodo TIC ADSO17</p>
         </div>
-      </body></html>`
-    });
+      </body></html>`;
+      
+    await sendBrevoEmail(email, '🎬 Bienvenido a CineApp', htmlBienvenida);
     console.log(`✉️  Bienvenida enviada a ${email}`);
     return { success: true };
   } catch (err) {
-    console.error('❌ Error enviando bienvenida:', err.message);
+    console.error('❌ Error enviando bienvenida con Brevo:', err.message);
     return { error: err.message };
   }
 };

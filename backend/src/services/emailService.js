@@ -49,8 +49,10 @@ export const enviarBienvenida = async ({ nombre, email }) => {
       </body></html>`
     });
     console.log(`✉️  Bienvenida enviada a ${email}`);
+    return { success: true };
   } catch (err) {
     console.error('❌ Error enviando bienvenida:', err.message);
+    return { error: err.message, stack: err.stack };
   }
 };
 

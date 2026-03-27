@@ -8,6 +8,7 @@ import peliculasRoutes from './routes/peliculas.js';
 import funcionesRoutes from './routes/funciones.js';
 import tiquetesRoutes from './routes/tiquetes.js';
 import tmdbRoutes from './routes/tmdb.js';
+import { enviarBienvenida } from './services/emailService.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +39,11 @@ app.use('/api/tiquetes', tiquetesRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
 app.get('/api/health', (_, res) => res.json({ estado: 'OK', timestamp: new Date() }));
+
+app.get('/api/test-email', async (req, res) => {
+  const result = await enviarBienvenida({ nombre: 'Admin', email: 'camilojc1725@gmail.com' });
+  res.json(result);
+});
 
 app.listen(PORT, () => {
   console.log(`🎬 Servidor CineApp corriendo en puerto ${PORT}`);

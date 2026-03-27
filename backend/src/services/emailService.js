@@ -1,56 +1,48 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = 'CineApp <onboarding@resend.dev>';
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  family: 4, // Fuerza el uso de IPv4 para evitar el error ENETUNREACH en Render
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  }
-});
 
 // ============================================
 // EMAIL: Bienvenida al registrarse
 // ============================================
 export const enviarBienvenida = async ({ nombre, email }) => {
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: FROM,
       to: email,
       subject: '🎬 Bienvenido a CineApp',
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
-      <body style="margin:0;padding:0;background:#080b10;font-family:'Segoe UI',sans-serif;">
-        <div style="max-width:520px;margin:0 auto;padding:40px 24px;">
-          <div style="text-align:center;margin-bottom:32px;">
-            <div style="display:inline-block;background:#111620;border:1px solid rgba(232,184,75,0.3);border-radius:12px;padding:12px 24px;">
-              <span style="font-size:1.4rem;font-weight:900;color:#f0f2f5;letter-spacing:0.1em;">CINE<span style="color:#e8b84b;">APP</span></span>
-            </div>
+      <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Inter',sans-serif;">
+        <div style="max-width:520px;margin:0 auto;padding:40px 20px;">
+          <div style="margin-bottom:28px;">
+            <span style="font-size:1.1rem;font-weight:800;color:#f0f0f0;letter-spacing:0.02em;">CINE<span style="color:#d4a843;">APP</span></span>
           </div>
-          <div style="background:#111620;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:40px 32px;">
-            <h1 style="color:#f0f2f5;font-size:1.8rem;margin:0 0 8px;font-weight:700;">¡Bienvenido, ${nombre}! 🎉</h1>
-            <p style="color:#8892a4;font-size:0.95rem;line-height:1.6;margin:0 0 28px;">Tu cuenta ha sido creada exitosamente. Ya puedes explorar la cartelera, seleccionar tus asientos y comprar tus tiquetes en segundos.</p>
-            <div style="margin-bottom:32px;">
-              <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 16px;margin-bottom:8px;"><span style="color:#f0f2f5;font-size:0.88rem;">🎬 Explora la cartelera de películas</span></div>
-              <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 16px;margin-bottom:8px;"><span style="color:#f0f2f5;font-size:0.88rem;">💺 Elige tus asientos favoritos</span></div>
-              <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 16px;margin-bottom:8px;"><span style="color:#f0f2f5;font-size:0.88rem;">🎟️ Recibe tu tiquete con código QR</span></div>
-              <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 16px;"><span style="color:#f0f2f5;font-size:0.88rem;">✅ Acceso rápido en la entrada</span></div>
+          <div style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:36px 32px;">
+            <h1 style="color:#f0f0f0;font-size:1.6rem;margin:0 0 10px;font-weight:700;">¡Bienvenido, ${nombre}!</h1>
+            <p style="color:#909090;font-size:0.9rem;line-height:1.65;margin:0 0 24px;">Tu cuenta ha sido creada exitosamente. Ya puedes explorar la cartelera, elegir tus asientos y comprar tus tiquetes.</p>
+            <div style="margin-bottom:28px;">
+              <div style="padding:11px 14px;background:rgba(255,255,255,0.04);border-radius:7px;margin-bottom:6px;font-size:0.86rem;color:#d0d0d0;">🎬 Explora más de 25 películas en cartelera</div>
+              <div style="padding:11px 14px;background:rgba(255,255,255,0.04);border-radius:7px;margin-bottom:6px;font-size:0.86rem;color:#d0d0d0;">💺 Selecciona tu asiento en tiempo real</div>
+              <div style="padding:11px 14px;background:rgba(255,255,255,0.04);border-radius:7px;font-size:0.86rem;color:#d0d0d0;">🎟️ Recibe tu tiquete con código QR al instante</div>
             </div>
-            <a href="${APP_URL}" style="display:block;text-align:center;background:#e8b84b;color:#000;font-weight:700;font-size:0.95rem;padding:14px 24px;border-radius:8px;text-decoration:none;">Ver cartelera →</a>
+            <a href="${APP_URL}" style="display:block;text-align:center;background:#d4a843;color:#0a0a0a;font-weight:700;font-size:0.9rem;padding:13px 24px;border-radius:8px;text-decoration:none;letter-spacing:0.01em;">Ver cartelera →</a>
           </div>
-          <p style="text-align:center;color:#4a5568;font-size:0.78rem;margin-top:24px;">CineApp — SENA CNCA Nodo TIC ADSO17</p>
+          <p style="text-align:center;color:#444;font-size:0.74rem;margin-top:20px;">CineApp · SENA CNCA Nodo TIC ADSO17</p>
         </div>
       </body></html>`
     });
-    console.log(`✉️  Bienvenida enviada a ${email}`);
+
+    if (error) {
+      console.error('❌ Resend error bienvenida:', error);
+      return { error };
+    }
+    console.log(`✉️  Bienvenida enviada a ${email}`, data?.id);
     return { success: true };
   } catch (err) {
     console.error('❌ Error enviando bienvenida:', err.message);
-    return { error: err.message, stack: err.stack };
+    return { error: err.message };
   }
 };
 
@@ -65,52 +57,66 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       })
     : '';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=080b10&margin=10`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=0a0a0a&margin=10`;
 
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: FROM,
       to: email,
-      subject: `🎟️ Tu tiquete para ${funcion?.titulo || 'la función'} — ${codigo}`,
+      subject: `🎟️ Tu tiquete — ${funcion?.titulo || 'CineApp'} · ${codigo}`,
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
-      <body style="margin:0;padding:0;background:#080b10;font-family:'Segoe UI',sans-serif;">
-        <div style="max-width:520px;margin:0 auto;padding:40px 24px;">
-          <div style="text-align:center;margin-bottom:32px;">
-            <div style="display:inline-block;background:#111620;border:1px solid rgba(232,184,75,0.3);border-radius:12px;padding:12px 24px;">
-              <span style="font-size:1.4rem;font-weight:900;color:#f0f2f5;letter-spacing:0.1em;">CINE<span style="color:#e8b84b;">APP</span></span>
-            </div>
+      <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Inter',sans-serif;">
+        <div style="max-width:520px;margin:0 auto;padding:40px 20px;">
+          <div style="margin-bottom:28px;">
+            <span style="font-size:1.1rem;font-weight:800;color:#f0f0f0;letter-spacing:0.02em;">CINE<span style="color:#d4a843;">APP</span></span>
           </div>
-          <div style="background:#111620;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:40px 32px;">
-            <div style="text-align:center;margin-bottom:28px;">
-              <div style="font-size:3rem;margin-bottom:8px;">✅</div>
-              <h1 style="color:#f0f2f5;font-size:1.6rem;margin:0 0 6px;font-weight:700;">¡Compra exitosa!</h1>
-              <p style="color:#8892a4;margin:0;font-size:0.9rem;">Hola ${nombre}, aquí está tu tiquete</p>
-            </div>
-            <div style="text-align:center;margin-bottom:28px;">
-              <div style="display:inline-block;background:#ffffff;border-radius:16px;padding:12px;border:3px solid rgba(232,184,75,0.4);">
-                <img src="${qrUrl}" width="180" height="180" alt="QR" style="display:block;border-radius:8px;"/>
-              </div>
-              <div style="margin-top:12px;background:rgba(232,184,75,0.1);border:1px dashed rgba(232,184,75,0.4);border-radius:10px;padding:12px;">
-                <p style="color:#8892a4;font-size:0.68rem;font-weight:700;letter-spacing:0.12em;margin:0 0 4px;">CÓDIGO DE ACCESO</p>
-                <p style="color:#e8b84b;font-family:monospace;font-size:1.6rem;font-weight:900;letter-spacing:0.15em;margin:0;">${codigo}</p>
+          <div style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:36px 32px;">
+            
+            <p style="color:#909090;font-size:0.82rem;margin:0 0 4px;">Hola ${nombre},</p>
+            <h1 style="color:#f0f0f0;font-size:1.4rem;margin:0 0 24px;font-weight:700;">Tu tiquete está listo ✅</h1>
+
+            <!-- QR + Código -->
+            <div style="display:flex;align-items:center;gap:20px;background:rgba(255,255,255,0.03);border-radius:10px;padding:20px;margin-bottom:24px;">
+              <img src="${qrUrl}" width="100" height="100" alt="QR" style="border-radius:6px;background:#fff;padding:6px;flex-shrink:0;"/>
+              <div>
+                <p style="color:#555;font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 6px;">Código de acceso</p>
+                <p style="color:#d4a843;font-family:monospace;font-size:1.4rem;font-weight:700;letter-spacing:0.1em;margin:0 0 8px;">${codigo}</p>
+                <p style="color:#555;font-size:0.75rem;margin:0;">Presenta este código en la entrada</p>
               </div>
             </div>
-            <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin-bottom:24px;">
-              <h3 style="color:#f0f2f5;font-size:1.1rem;margin:0 0 16px;font-weight:700;">${funcion?.titulo || ''}</h3>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#8892a4;font-size:0.85rem;">📅 Fecha</span><span style="color:#f0f2f5;font-size:0.85rem;font-weight:600;">${fechaFormateada}</span></div>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#8892a4;font-size:0.85rem;">🕐 Hora</span><span style="color:#f0f2f5;font-size:0.85rem;font-weight:600;">${funcion?.hora?.slice(0,5) || ''}</span></div>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#8892a4;font-size:0.85rem;">📍 Sala</span><span style="color:#f0f2f5;font-size:0.85rem;font-weight:600;">${funcion?.sala || ''}</span></div>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#8892a4;font-size:0.85rem;">💺 Asientos</span><span style="color:#f0f2f5;font-size:0.85rem;font-weight:600;">${asientosStr}</span></div>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="color:#8892a4;font-size:0.85rem;">💰 Total</span><span style="color:#e8b84b;font-size:0.85rem;font-weight:700;">$${Number(total).toLocaleString('es-CO')}</span></div>
+
+            <!-- Detalles -->
+            <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:20px;">
+              <h3 style="color:#f0f0f0;font-size:1rem;margin:0 0 14px;font-weight:600;">${funcion?.titulo || ''}</h3>
+              ${[
+                ['Fecha', fechaFormateada],
+                ['Hora', funcion?.hora?.slice(0,5) || ''],
+                ['Sala', funcion?.sala || ''],
+                ['Asientos', asientosStr],
+              ].map(([l, v]) => `
+                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                  <span style="color:#909090;font-size:0.82rem;">${l}</span>
+                  <span style="color:#f0f0f0;font-size:0.82rem;font-weight:500;">${v}</span>
+                </div>`).join('')}
+              <div style="display:flex;justify-content:space-between;padding:10px 0 0;">
+                <span style="color:#909090;font-size:0.82rem;font-weight:600;">Total pagado</span>
+                <span style="color:#d4a843;font-size:1rem;font-weight:700;">$${Number(total).toLocaleString('es-CO')}</span>
+              </div>
             </div>
-            <p style="color:#4a5568;font-size:0.82rem;text-align:center;margin:0;">Presenta este QR o el código en la entrada del cine.<br/>No compartas este código con nadie.</p>
           </div>
-          <p style="text-align:center;color:#4a5568;font-size:0.78rem;margin-top:24px;">CineApp — SENA CNCA Nodo TIC ADSO17</p>
+          <p style="text-align:center;color:#444;font-size:0.74rem;margin-top:20px;">CineApp · SENA CNCA Nodo TIC ADSO17</p>
         </div>
       </body></html>`
     });
-    console.log(`✉️  Tiquete enviado a ${email}`);
+
+    if (error) {
+      console.error('❌ Resend error tiquete:', error);
+      return { error };
+    }
+    console.log(`✉️  Tiquete enviado a ${email}`, data?.id);
+    return { success: true };
   } catch (err) {
     console.error('❌ Error enviando tiquete:', err.message);
+    return { error: err.message };
   }
 };

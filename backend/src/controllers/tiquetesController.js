@@ -38,8 +38,9 @@ export const comprar = async (req, res) => {
     const total = precio * asientos_ids.length;
     const codigo = nanoid(10).toUpperCase();
 
+    // Guardar el tiquete como 'pendiente'
     const { rows: tiqRows } = await client.query(
-      'INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total) VALUES ($1,$2,$3,$4) RETURNING *',
+      "INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total, estado) VALUES ($1,$2,$3,$4,'pendiente') RETURNING *",
       [codigo, usuario_id, funcion_id, total]
     );
     const tiquete = tiqRows[0];
@@ -73,27 +74,83 @@ export const comprar = async (req, res) => {
 
     const tiqueteCompleto = { ...tiquete, asientos: detalles, funcion: funcDetalle[0] };
 
-    // Enviar correo con el tiquete si hay usuario logueado
-    if (usuario_id) {
-      const { rows: userRows } = await pool.query(
-        'SELECT nombre, email FROM usuarios WHERE id = $1',
-        [usuario_id]
-      );
-      if (userRows.length > 0) {
-        await enviarTiquete({
-          email: userRows[0].email,
-          nombre: userRows[0].nombre,
-          tiquete: tiqueteCompleto
-        });
-      }
-    }
-
+    // El correo ya no se envía aquí, se enviará al confirmar por el admin
     res.status(201).json({ tiquete: tiqueteCompleto });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ mensaje: 'Error al procesar compra', error: err.message });
   } finally {
     client.release();
+  }
+};
+
+export const listarPendientes = async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT t.*, u.nombre as usuario_nombre, u.email as usuario_email, p.titulo, f.fecha, f.hora, f.sala,
+        json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos
+      FROM tiquetes t
+      JOIN usuarios u ON u.id = t.usuario_id
+      JOIN funciones f ON f.id = t.funcion_id
+      JOIN peliculas p ON p.id = f.pelicula_id
+      JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
+      JOIN asientos a ON a.id = dt.asiento_id
+      WHERE t.estado = 'pendiente'
+      GROUP BY t.id, u.nombre, u.email, p.titulo, f.fecha, f.hora, f.sala
+      ORDER BY t.fecha_compra ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al obtener pendientes', error: err.message });
+  }
+};
+
+export const confirmarTiquete = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows: tiqRows } = await pool.query("UPDATE tiquetes SET estado='valido' WHERE id=$1 RETURNING *", [id]);
+    if (tiqRows.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    const tiquete = tiqRows[0];
+
+    const { rows: detalles } = await pool.query(`
+      SELECT a.fila, a.columna, a.numero, dt.precio_unitario
+      FROM detalle_tiquete dt
+      JOIN asientos a ON a.id = dt.asiento_id
+      WHERE dt.tiquete_id = $1
+    `, [tiquete.id]);
+
+    const { rows: funcDetalle } = await pool.query(`
+      SELECT f.fecha, f.hora, f.sala, p.titulo
+      FROM funciones f JOIN peliculas p ON p.id = f.pelicula_id
+      WHERE f.id = $1
+    `, [tiquete.funcion_id]);
+
+    const { rows: userRows } = await pool.query('SELECT nombre, email FROM usuarios WHERE id = $1', [tiquete.usuario_id]);
+
+    const tiqueteCompleto = { ...tiquete, asientos: detalles, funcion: funcDetalle[0] };
+
+    if (userRows.length > 0) {
+      await enviarTiquete({
+        email: userRows[0].email,
+        nombre: userRows[0].nombre,
+        tiquete: tiqueteCompleto
+      });
+    }
+
+    res.json({ mensaje: 'Tiquete confirmado y correo enviado', tiquete: tiqueteCompleto });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al confirmar', error: err.message });
+  }
+};
+
+export const rechazarTiquete = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows } = await pool.query("UPDATE tiquetes SET estado='cancelado' WHERE id=$1 RETURNING *", [id]);
+    if (rows.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    res.json({ mensaje: 'Tiquete cancelado exitosamente', tiquete: rows[0] });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al cancelar', error: err.message });
   }
 };
 
@@ -118,6 +175,8 @@ export const validar = async (req, res) => {
       return res.json({ valido: false, estado: 'usado', mensaje: 'Tiquete ya fue utilizado', tiquete });
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
+    if (tiquete.estado === 'pendiente')
+      return res.json({ valido: false, estado: 'pendiente', mensaje: 'Tiquete pendiente de confirmación', tiquete });
 
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
     res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });
@@ -151,7 +210,7 @@ export const dashboard = async (req, res) => {
     const [ventas, ocupacion, populares] = await Promise.all([
       pool.query(`
         SELECT DATE(fecha_compra) as dia, COUNT(*) as cantidad, SUM(total) as total
-        FROM tiquetes WHERE estado != 'cancelado'
+        FROM tiquetes WHERE estado != 'cancelado' AND estado != 'pendiente'
         GROUP BY dia ORDER BY dia DESC LIMIT 7
       `),
       pool.query(`
@@ -171,7 +230,7 @@ export const dashboard = async (req, res) => {
         FROM tiquetes t
         JOIN funciones f ON f.id = t.funcion_id
         JOIN peliculas p ON p.id = f.pelicula_id
-        WHERE t.estado != 'cancelado'
+        WHERE t.estado != 'cancelado' AND t.estado != 'pendiente'
         GROUP BY p.titulo ORDER BY ventas DESC LIMIT 5
       `)
     ]);

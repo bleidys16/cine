@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { comprar, validar, listarMios, dashboard } from '../controllers/tiquetesController.js';
+import { comprar, validar, listarMios, dashboard, listarPendientes, confirmarTiquete, rechazarTiquete } from '../controllers/tiquetesController.js';
 import { verificarToken, soloAdmin } from '../middleware/auth.js';
 const router = Router();
 router.post('/comprar', verificarToken, comprar);
 router.post('/validar', verificarToken, soloAdmin, validar);
 router.get('/mis-tiquetes', verificarToken, listarMios);
 router.get('/dashboard', verificarToken, soloAdmin, dashboard);
+router.get('/pendientes', verificarToken, soloAdmin, listarPendientes);
+router.put('/:id/confirmar', verificarToken, soloAdmin, confirmarTiquete);
+router.put('/:id/rechazar', verificarToken, soloAdmin, rechazarTiquete);
 export default router;

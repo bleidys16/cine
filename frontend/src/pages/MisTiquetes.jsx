@@ -18,7 +18,7 @@ export default function MisTiquetes() {
   }, []);
 
   const estadoBadge = (estado) => ({
-    activo: 'badge-green', usado: 'badge-gray', cancelado: 'badge-red'
+    activo: 'badge-green', valido: 'badge-green', pendiente: 'badge-yellow', usado: 'badge-gray', cancelado: 'badge-red'
   }[estado] || 'badge-gray');
 
   if (cargando) return (
@@ -80,20 +80,30 @@ export default function MisTiquetes() {
                   </div>
                 </div>
 
-                {/* QR expandible */}
+                {/* QR expandible o Mensaje Pendiente */}
                 {expandido === t.id && (
                   <div className={styles.qrPanel}>
-                    <div className={styles.qrBox}>
-                      <QRCodeSVG
-                        value={t.codigo}
-                        size={160}
-                        bgColor="#ffffff"
-                        fgColor="#080b10"
-                        level="H"
-                        includeMargin={true}
-                      />
-                    </div>
-                    <p className={styles.qrHint}>Presenta este QR en la entrada del cine</p>
+                    {t.estado === 'pendiente' ? (
+                      <div style={{ padding: '20px', textAlign: 'center', maxWidth: 350, margin: '0 auto' }}>
+                        <div style={{ padding: '14px', background: 'rgba(212, 168, 67, 0.1)', border: '1px solid rgba(212, 168, 67, 0.2)', borderRadius: 8, color: '#d4a843', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                          ⏳ Tu compra está en revisión por un administrador. Recibirás el código QR cuando sea aprobada.
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className={styles.qrBox}>
+                          <QRCodeSVG
+                            value={t.codigo}
+                            size={160}
+                            bgColor="#ffffff"
+                            fgColor="#080b10"
+                            level="H"
+                            includeMargin={true}
+                          />
+                        </div>
+                        <p className={styles.qrHint}>Presenta este QR en la entrada del cine</p>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

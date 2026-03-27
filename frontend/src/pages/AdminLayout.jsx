@@ -1,10 +1,11 @@
 import { NavLink, Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Film, Calendar, ScanLine, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Film, Calendar, ScanLine, ChevronRight, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './AdminLayout.module.css';
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={17} />, end: true },
+  { to: '/admin/pendientes', label: 'Pendientes', icon: <Clock size={17} /> },
   { to: '/admin/peliculas', label: 'Películas', icon: <Film size={17} /> },
   { to: '/admin/funciones', label: 'Funciones', icon: <Calendar size={17} /> },
   { to: '/admin/validar', label: 'Validar Tiquetes', icon: <ScanLine size={17} /> },

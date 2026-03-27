@@ -9,6 +9,7 @@ import MisTiquetes from './pages/MisTiquetes';
 import Preventa from './pages/Preventa';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminPendientes from './pages/AdminPendientes';
 import AdminPeliculas from './pages/AdminPeliculas';
 import AdminFunciones from './pages/AdminFunciones';
 import AdminValidador from './pages/AdminValidador';
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/mis-tiquetes" element={<ProtectedRoute><MisTiquetes /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="pendientes" element={<AdminPendientes />} />
           <Route path="peliculas" element={<AdminPeliculas />} />
           <Route path="funciones" element={<AdminFunciones />} />
           <Route path="validar" element={<AdminValidador />} />

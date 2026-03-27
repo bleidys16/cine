@@ -1,26 +1,20 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  family: 4, // Fuerza el uso de IPv4 para evitar el error ENETUNREACH en Render
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ============================================
 // EMAIL: Bienvenida al registrarse
 // ============================================
 export const enviarBienvenida = async ({ nombre, email }) => {
+  if (!process.env.RESEND_API_KEY) {
+    console.log('⚠️ RESEND_API_KEY no configurada. Simulando envío de bienvenida a', email);
+    return { success: true };
+  }
+
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: 'CineApp 🎬 <onboarding@resend.dev>', // Resend usa este remitente por defecto en cuentas gratis
       to: email,
       subject: '🎬 Bienvenido a CineApp',
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
@@ -46,6 +40,12 @@ export const enviarBienvenida = async ({ nombre, email }) => {
         </div>
       </body></html>`
     });
+
+    if (error) {
+      console.error('❌ Error de Resend:', error.message);
+      return { error: error.message };
+    }
+
     console.log(`✉️  Bienvenida enviada a ${email}`);
     return { success: true };
   } catch (err) {
@@ -67,9 +67,14 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
     : '';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=080b10&margin=10`;
 
+  if (!process.env.RESEND_API_KEY) {
+    console.log('⚠️ RESEND_API_KEY no configurada. Simulando envío de tiquete a', email);
+    return;
+  }
+
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: 'CineApp 🎬 <onboarding@resend.dev>',
       to: email,
       subject: `🎟️ Tu tiquete para ${funcion?.titulo || 'la función'} — ${codigo}`,
       html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
@@ -109,8 +114,14 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
         </div>
       </body></html>`
     });
+
+    if (error) {
+      console.error('❌ Error de Resend en tiquete:', error.message);
+      return;
+    }
+
     console.log(`✉️  Tiquete enviado a ${email}`);
   } catch (err) {
-    console.error('❌ Error enviando tiquete:', err.message);
+    console.error('❌ Error catch enviando tiquete:', err.message);
   }
 };

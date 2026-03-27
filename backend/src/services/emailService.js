@@ -2,9 +2,7 @@ import nodemailer from 'nodemailer';
 
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
 
-// Transportador Gmail
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,

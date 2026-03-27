@@ -117,7 +117,7 @@ export const confirmarTiquete = async (req, res) => {
     // Nos aseguramos de que mida 10 caracteres. Si quitamos PEND-, quedan 5. Añadimos 5 randoms al final.
 
     const { rows: tiqRows } = await pool.query(
-      "UPDATE tiquetes SET codigo=$1, estado='valido' WHERE id=$2 RETURNING *", 
+      "UPDATE tiquetes SET codigo=$1, estado='activo' WHERE id=$2 RETURNING *", 
       [nuevoCodigo, id]
     );
     const tiquete = tiqRows[0];

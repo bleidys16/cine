@@ -72,11 +72,8 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=080b10&margin=10`;
 
   try {
-    await transporter.sendMail({
-      from: `"CineApp 🎬" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: `🎟️ Tu tiquete — ${funcion?.titulo || 'CineApp'} · ${codigo}`,
-      html: `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+    const tituloTicket = `🎟️ Tu tiquete — ${funcion?.titulo || 'CineApp'} · ${codigo}`;
+    const htmlTiquete = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
       <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Inter',sans-serif;">
         <div style="max-width:520px;margin:0 auto;padding:40px 20px;">
           <div style="margin-bottom:28px;">
@@ -118,10 +115,13 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
           </div>
           <p style="text-align:center;color:#444;font-size:0.74rem;margin-top:20px;">CineApp · SENA CNCA Nodo TIC ADSO17</p>
         </div>
-      </body></html>`
-    });
+      </body></html>`;
+
+    await sendBrevoEmail(email, tituloTicket, htmlTiquete);
     console.log(`✉️  Tiquete enviado a ${email}`);
+    return { success: true };
   } catch (err) {
-    console.error('❌ Error enviando tiquete:', err.message);
+    console.error('❌ Error enviando tiquete con Brevo:', err.message);
+    return { error: err.message };
   }
 };

@@ -1,6 +1,6 @@
 import styles from './HeroPosterGrid.module.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || 'https://cine-41x4.onrender.com/api';
 
 const getProxy = (url) => {
   if (!url?.includes('image.tmdb.org')) return null;
@@ -8,7 +8,7 @@ const getProxy = (url) => {
   return path ? `${API}/tmdb/poster/${path}` : null;
 };
 
-export default function HeroPosterGrid({ peliculas = [] }) {
+export default function HeroPosterGrid({ peliculas = [], animate = true }) {
   // Solo usar imágenes que ya están en la BD y funcionan
   const posters = peliculas
     .filter(p => p.imagen_url?.includes('image.tmdb.org'))
@@ -26,7 +26,7 @@ export default function HeroPosterGrid({ peliculas = [] }) {
   return (
     <div className={styles.grid} aria-hidden="true">
       {cols.map((col, ci) => (
-        <div key={ci} className={`${styles.col} ${ci % 2 === 1 ? styles.colOffset : ''}`}>
+        <div key={ci} className={`${styles.col} ${ci % 2 === 1 ? styles.colOffset : ''} ${!animate ? styles.static : ''}`}>
           {[...col, ...col].map((src, pi) => (
             <div key={pi} className={styles.posterWrap}>
               <img

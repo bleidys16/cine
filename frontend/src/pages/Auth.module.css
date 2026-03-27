@@ -2,19 +2,37 @@
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
   padding: 80px 16px 40px;
-  background: var(--bg-base);
+  position: relative;
+  overflow: hidden;
 }
 /* Subtle background pattern */
 .page::before {
   content: '';
-  position: fixed; inset: 0;
-  background-image: radial-gradient(circle at 20% 50%, rgba(201,168,76,0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(201,168,76,0.03) 0%, transparent 40%);
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 40%);
+  z-index: 2;
   pointer-events: none;
+}
+
+.bgWrap {
+  position: absolute;
+  inset: -50px 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.6), rgba(10,10,10,0.85));
+   backdrop-filter: blur(2px);
+  z-index: 1;
 }
 
 .card {
   position: relative;
+  z-index: 10;
   width: 100%; max-width: 400px;
   background: var(--bg-surface);
   border: 1px solid var(--border);

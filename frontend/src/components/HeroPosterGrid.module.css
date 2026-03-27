@@ -41,6 +41,10 @@
   .col { animation: none; }
 }
 
+.static {
+  animation: none !important;
+}
+
 .posterWrap {
   border-radius: 6px;
   overflow: hidden;

@@ -5,9 +5,13 @@ const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
 // Transportador Gmail
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  family: 4, // Fuerza el uso de IPv4 para evitar el error ENETUNREACH en Render
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS  // contraseña de aplicación, no tu password real
+    pass: process.env.GMAIL_PASS
   }
 });
 

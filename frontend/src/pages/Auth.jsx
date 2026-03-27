@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Film, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './Auth.module.css';
+import api from '../services/api';
+import HeroPosterGrid from '../components/HeroPosterGrid';
 
 export function Login() {
   const { login, cargando } = useAuth();
@@ -10,6 +12,11 @@ export function Login() {
   const [form, setForm] = useState({ email: '', contrasena: '' });
   const [error, setError] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [peliculas, setPeliculas] = useState([]);
+
+  useEffect(() => {
+    api.get('/peliculas').then(r => setPeliculas(r.data)).catch(console.error);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +28,10 @@ export function Login() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.bgWrap}>
+        <HeroPosterGrid peliculas={peliculas} animate={false} />
+        <div className={styles.overlay} />
+      </div>
       <div className={styles.card}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}><Film size={24} /></div>
@@ -83,6 +94,11 @@ export function Registro() {
   const [form, setForm] = useState({ nombre: '', email: '', contrasena: '' });
   const [error, setError] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [peliculas, setPeliculas] = useState([]);
+
+  useEffect(() => {
+    api.get('/peliculas').then(r => setPeliculas(r.data)).catch(console.error);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,6 +111,10 @@ export function Registro() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.bgWrap}>
+        <HeroPosterGrid peliculas={peliculas} animate={false} />
+        <div className={styles.overlay} />
+      </div>
       <div className={styles.card}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}><Film size={24} /></div>

@@ -20,7 +20,7 @@ export default function Compra() {
 
   useEffect(() => {
     Promise.all([
-      api.get(`/funciones/pelicula/all`).catch(() => ({ data: [] })),
+      api.get(`/funciones`).catch(() => ({ data: [] })),
       api.get(`/funciones/${funcionId}/asientos`)
     ]).then(([_, a]) => setAsientos(a.data))
       .catch(console.error)
@@ -165,35 +165,19 @@ function TiqueteConfirmado({ tiquete, navigate }) {
 
           {/* Header */}
           <div className={styles.tiqueteHeader}>
-            <CheckCircle size={40} color="var(--green)" strokeWidth={1.5} />
+            <CheckCircle size={40} color="var(--yellow)" strokeWidth={1.5} />
             <div>
-              <h2 className={styles.tiqueteTitle}>¡Compra exitosa!</h2>
-              <p className={styles.tiqueteSub}>Presenta el QR o el código en la entrada</p>
+              <h2 className={styles.tiqueteTitle}>¡Solicitud recibida!</h2>
+              <p className={styles.tiqueteSub}>Tu compra está pendiente de validación por un administrador. Recibirás tu código QR una vez esté confirmada.</p>
             </div>
           </div>
 
           <hr className="divider" />
 
-          {/* QR */}
-          <div className={styles.qrSection}>
-            <div className={styles.qrBox}>
-              <QRCodeSVG
-                id="qr-tiquete"
-                value={tiquete.codigo}
-                size={160}
-                bgColor="#ffffff"
-                fgColor="#0a0a0a"
-                level="H"
-                includeMargin={true}
-              />
-            </div>
-            <div className={styles.codigoWrap}>
-              <span className={styles.codigoLabel}>Código de acceso</span>
-              <span className={styles.codigo}>{tiquete.codigo}</span>
-              <button className={`btn btn-ghost ${styles.btnDescargar}`} onClick={handleDescargar}>
-                <Download size={13} /> Descargar QR
-              </button>
-            </div>
+          {/* Código temporal */}
+          <div className={styles.qrSection} style={{ padding: '20px 0', textAlign: 'center' }}>
+            <span className={styles.codigoLabel}>Código de referencia</span>
+            <span className={styles.codigo} style={{ fontSize: '1.6rem', color: 'var(--yellow)' }}>{tiquete.codigo}</span>
           </div>
 
           <hr className="divider" />

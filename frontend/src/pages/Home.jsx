@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import PeliculaCard from '../components/PeliculaCard';
 import HeroPosterGrid from '../components/HeroPosterGrid';
@@ -12,12 +13,24 @@ export default function Home() {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [genero, setGenero] = useState('Todos');
+  const [mostrarAutocomplete, setMostrarAutocomplete] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     api.get('/peliculas')
       .then(r => setPeliculas(r.data))
       .catch(console.error)
       .finally(() => setCargando(false));
+  }, []);
+
+  useEffect(() => {
+    const handleClickFuera = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setMostrarAutocomplete(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickFuera);
+    return () => document.removeEventListener("mousedown", handleClickFuera);
   }, []);
 
   const enCartelera = peliculas.filter(p => p.estado === 'activa');
@@ -44,14 +57,36 @@ export default function Home() {
       <section className={styles.filters}>
         <div className="container">
           <div className={styles.filtersInner}>
-            <div className={styles.searchWrap}>
+            <div className={styles.searchWrap} ref={searchRef}>
               <Search size={14} className={styles.searchIcon} />
               <input
                 className={`input ${styles.searchInput}`}
                 placeholder="Buscar película..."
                 value={busqueda}
-                onChange={e => setBusqueda(e.target.value)}
+                onChange={e => {
+                  setBusqueda(e.target.value);
+                  setMostrarAutocomplete(true);
+                }}
+                onFocus={() => setMostrarAutocomplete(true)}
               />
+              
+              {mostrarAutocomplete && busqueda.trim() !== '' && filtradas.length > 0 && (
+                <div className={styles.autocompleteDropdown}>
+                  {filtradas.slice(0, 5).map(p => (
+                    <Link 
+                      to={`/pelicula/${p.id}`} 
+                      key={p.id} 
+                      className={styles.autocompleteItem}
+                      onClick={() => setMostrarAutocomplete(false)}
+                    >
+                      <div className={styles.autocompleteInfo}>
+                        <span className={styles.autocompleteTitle}>{p.titulo}</span>
+                        <span className={styles.autocompleteMeta}>{p.genero} {p.clasificacion ? `· ${p.clasificacion}` : ''}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
             <div className={styles.genreTabs}>
               {GENEROS.map(g => (

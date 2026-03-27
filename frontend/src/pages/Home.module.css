@@ -55,6 +55,52 @@
 .genreTab:hover { border-color: var(--border-strong); color: var(--text-primary); }
 .genreTab.active { background: var(--gold); color: #0a0a0a; border-color: var(--gold); font-weight: 700; }
 
+/* ── AUTOCOMPLETE ── */
+.autocompleteDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  max-width: 400px;
+  z-index: 50;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+.autocompleteItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 12px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 0.2s;
+  border-bottom: 1px solid var(--border);
+}
+.autocompleteItem:last-child {
+  border-bottom: none;
+}
+.autocompleteItem:hover {
+  background: rgba(255,255,255,0.05);
+}
+.autocompleteInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.autocompleteTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+.autocompleteMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* ── SECTION HEADERS ── */
 .sectionHeader {
   display: flex; align-items: center; gap: 12px;

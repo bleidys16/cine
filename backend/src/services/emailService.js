@@ -1,20 +1,8 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'CineApp <onboarding@resend.dev>';
 const APP_URL = process.env.FRONTEND_URL || 'https://cine-psi-lilac.vercel.app';
+const SENDER_EMAIL = process.env.GMAIL_USER || 'lariosbleidys@gmail.com'; // Debe coincidir con tu correo registrado en Brevo
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  family: 4, // Fuerza el uso de IPv4 para evitar el error ENETUNREACH en Render
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  }
-});
+// Función genérica para enviar correos usando la API web de Brevo (bypasses Render 465/587 blocks)
+const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
 
 // ============================================
 // EMAIL: Bienvenida al registrarse

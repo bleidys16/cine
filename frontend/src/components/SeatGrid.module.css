@@ -1,40 +1,275 @@
-.wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 16px 0; }
-
-.pantalla { width: 100%; max-width: 580px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.16em; color: var(--text-muted); text-transform: uppercase; }
-.pantallaBar { width: 65%; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); border-radius: 2px; }
-
-.leyenda { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
-.leyendaItem { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-secondary); }
-.dot { width: 11px; height: 11px; border-radius: 3px; }
-.dotDisp { background: var(--bg-overlay); border: 1px solid var(--border-strong); }
-.dotSel { background: var(--gold); }
-.dotOcup { background: var(--bg-elevated); border: 1px solid var(--border); opacity: 0.4; }
-
-.grid { display: flex; flex-direction: column; gap: 5px; width: 100%; overflow-x: auto; padding-bottom: 6px; }
-.row { display: flex; align-items: center; gap: 7px; }
-.filaLabel { width: 18px; min-width: 18px; text-align: center; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
-.seats { display: flex; gap: 4px; flex-wrap: nowrap; }
-
-.seat {
-  width: 26px; height: 24px;
-  border-radius: 4px 4px 2px 2px;
-  border: none;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.12s ease;
-  flex-shrink: 0;
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 16px;
+  background: linear-gradient(180deg, #1a1a1f 0%, #0f0f13 100%);
+  border-radius: 16px;
 }
-.seatNum { font-size: 0.55rem; font-weight: 600; pointer-events: none; }
 
-.disponible { background: var(--bg-overlay); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border-strong); }
-.disponible:hover { background: var(--gold-subtle); border-color: var(--gold); color: var(--gold); transform: scale(1.12); }
+/* Pantalla curva */
+.pantallaCurva {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
 
-.seleccionado { background: var(--gold); color: #0a0a0a; cursor: pointer; border: 1px solid var(--gold); transform: scale(1.08); }
-.seleccionado:hover { background: var(--gold-light); transform: scale(1.05); }
+.pantallaArco {
+  width: 85%;
+  height: 12px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255,255,255,0.1) 10%,
+    rgba(255,255,255,0.3) 30%,
+    rgba(255,255,255,0.4) 50%,
+    rgba(255,255,255,0.3) 70%,
+    rgba(255,255,255,0.1) 90%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 0 0;
+  position: relative;
+  box-shadow: 
+    0 -4px 20px rgba(255,255,255,0.1),
+    0 -8px 40px rgba(255,255,255,0.05);
+}
 
-.ocupado { background: var(--bg-elevated); color: var(--text-disabled); cursor: not-allowed; border: 1px solid var(--border); opacity: 0.35; }
+.pantallaArco::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 30px;
+  background: linear-gradient(180deg, 
+    rgba(255,255,255,0.08) 0%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 0 0;
+  filter: blur(8px);
+}
 
-@media (max-width: 600px) {
-  .seat { width: 22px; height: 20px; }
-  .seatNum { font-size: 0.48rem; }
-  .seats { gap: 3px; }
+.pantallaTexto {
+  margin-top: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+/* Leyenda */
+.leyenda {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 12px 24px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 24px;
+}
+
+.leyendaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.asientoIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px 4px 2px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.asientoIcon span {
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+/* Estados del icono */
+.dispIcon {
+  background: #374151;
+  border: 1px solid #4b5563;
+  color: #6b7280;
+}
+
+.selIcon {
+  background: #fbbf24;
+  color: #000;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.ocupIcon {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #374151;
+}
+
+/* Grid de asientos con perspectiva */
+.gridContainer {
+  perspective: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  transform: rotateX(5deg);
+  transform-origin: center top;
+}
+
+/* Cada fila con curva */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* Curva de la sala - filas más anchas en el centro */
+.row:nth-child(1) { transform: translateX(0) scale(0.85); }
+.row:nth-child(2) { transform: translateX(0) scale(0.88); }
+.row:nth-child(3) { transform: translateX(0) scale(0.91); }
+.row:nth-child(4) { transform: translateX(0) scale(0.94); }
+.row:nth-child(5) { transform: translateX(0) scale(0.97); }
+.row:nth-child(6) { transform: translateX(0) scale(1); }
+.row:nth-child(7) { transform: translateX(0) scale(1.02); }
+.row:nth-child(8) { transform: translateX(0) scale(1.04); }
+.row:nth-child(9) { transform: translateX(0) scale(1.05); }
+.row:nth-child(10) { transform: translateX(0) scale(1.06); }
+
+.filaLabel {
+  width: 24px;
+  min-width: 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.seats {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+
+/* Asiento estilo butaca de cine */
+.seat {
+  width: 28px;
+  height: 26px;
+  border-radius: 6px 6px 3px 3px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Forma de butaca con respaldo */
+.seat::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+.seatNum {
+  font-size: 0.6rem;
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Estados de asientos */
+.disponible {
+  background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+  color: #9ca3af;
+  cursor: pointer;
+  border: 1px solid #4b5563;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.disponible:hover {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  border-color: #fbbf24;
+  color: #000;
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(251, 191, 36, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.seleccionado {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  color: #000;
+  cursor: pointer;
+  border: 1px solid #fbbf24;
+  transform: scale(1.1);
+  box-shadow: 
+    0 3px 10px rgba(251, 191, 36, 0.5),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.seleccionado:hover {
+  background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
+  transform: scale(1.08);
+}
+
+.ocupado {
+  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  color: #374151;
+  cursor: not-allowed;
+  border: 1px solid #1f2937;
+  opacity: 0.5;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .seat {
+    width: 24px;
+    height: 22px;
+  }
+  
+  .seatNum {
+    font-size: 0.5rem;
+  }
+  
+  .seats {
+    gap: 4px;
+  }
+  
+  .filaLabel {
+    width: 20px;
+    font-size: 0.65rem;
+  }
+  
+  .row:nth-child(n) {
+    transform: scale(0.9);
+  }
 }

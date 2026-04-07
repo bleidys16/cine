@@ -67,7 +67,7 @@ export const comprar = async (req, res) => {
     `, [tiquete.id]);
 
     const { rows: funcDetalle } = await pool.query(`
-      SELECT f.fecha, f.hora, f.sala, p.titulo
+      SELECT f.fecha, f.hora, p.titulo
       FROM funciones f JOIN peliculas p ON p.id = f.pelicula_id
       WHERE f.id = $1
     `, [funcion_id]);
@@ -87,7 +87,7 @@ export const comprar = async (req, res) => {
 export const listarPendientes = async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, u.nombre as usuario_nombre, u.email as usuario_email, p.titulo, f.fecha, f.hora, f.sala,
+      SELECT t.*, u.nombre as usuario_nombre, u.email as usuario_email, p.titulo, f.fecha, f.hora,
         json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos
       FROM tiquetes t
       JOIN usuarios u ON u.id = t.usuario_id
@@ -96,7 +96,7 @@ export const listarPendientes = async (req, res) => {
       JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
       JOIN asientos a ON a.id = dt.asiento_id
       WHERE t.codigo LIKE 'PEND-%' AND t.estado != 'cancelado'
-      GROUP BY t.id, u.nombre, u.email, p.titulo, f.fecha, f.hora, f.sala
+      GROUP BY t.id, u.nombre, u.email, p.titulo, f.fecha, f.hora
       ORDER BY t.fecha_compra ASC
     `);
     res.json(rows);
@@ -130,7 +130,7 @@ export const confirmarTiquete = async (req, res) => {
     `, [tiquete.id]);
 
     const { rows: funcDetalle } = await pool.query(`
-      SELECT f.fecha, f.hora, f.sala, p.titulo
+      SELECT f.fecha, f.hora, p.titulo
       FROM funciones f JOIN peliculas p ON p.id = f.pelicula_id
       WHERE f.id = $1
     `, [tiquete.funcion_id]);
@@ -170,7 +170,7 @@ export const validar = async (req, res) => {
 
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, f.fecha, f.hora, f.sala, p.titulo
+      SELECT t.*, f.fecha, f.hora, p.titulo
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
       JOIN peliculas p ON p.id = f.pelicula_id
@@ -198,7 +198,7 @@ export const validar = async (req, res) => {
 export const listarMios = async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, p.titulo, f.fecha, f.hora, f.sala,
+      SELECT t.*, p.titulo, f.fecha, f.hora,
         json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
@@ -206,7 +206,7 @@ export const listarMios = async (req, res) => {
       JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
       JOIN asientos a ON a.id = dt.asiento_id
       WHERE t.usuario_id = $1
-      GROUP BY t.id, p.titulo, f.fecha, f.hora, f.sala
+      GROUP BY t.id, p.titulo, f.fecha, f.hora
       ORDER BY t.fecha_compra DESC
     `, [req.usuario.id]);
     res.json(rows.map(t => {

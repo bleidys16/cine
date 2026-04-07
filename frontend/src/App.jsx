@@ -13,6 +13,7 @@ import AdminPendientes from './pages/AdminPendientes';
 import AdminPeliculas from './pages/AdminPeliculas';
 import AdminFunciones from './pages/AdminFunciones';
 import AdminValidador from './pages/AdminValidador';
+import AdminSalas from './pages/AdminSalas';
 
 function ProtectedRoute({ children }) {
   const { usuario } = useAuth();
@@ -36,6 +37,7 @@ function AppRoutes() {
           <Route path="pendientes" element={<AdminPendientes />} />
           <Route path="peliculas" element={<AdminPeliculas />} />
           <Route path="funciones" element={<AdminFunciones />} />
+          <Route path="salas" element={<AdminSalas />} />
           <Route path="validar" element={<AdminValidador />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

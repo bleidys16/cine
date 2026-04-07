@@ -4,13 +4,15 @@ export const listar = async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT f.*, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion,
+        s.nombre as sala,
         COUNT(DISTINCT af.asiento_id) AS asientos_ocupados,
-        150 - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
+        s.capacidad_total - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
       FROM funciones f
       JOIN peliculas p ON f.pelicula_id = p.id
+      LEFT JOIN salas s ON f.sala_id = s.id
       LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
       WHERE f.estado IN ('disponible', 'preventa') AND f.fecha >= CURRENT_DATE
-      GROUP BY f.id, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion
+      GROUP BY f.id, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion, s.nombre, s.capacidad_total
       ORDER BY f.fecha ASC, f.hora ASC
     `);
     res.json(rows);
@@ -22,13 +24,14 @@ export const listar = async (req, res) => {
 export const listarPorPelicula = async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT f.*,
+      SELECT f.*, s.nombre as sala,
         COUNT(DISTINCT af.asiento_id) AS asientos_ocupados,
-        150 - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
+        s.capacidad_total - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
       FROM funciones f
+      LEFT JOIN salas s ON f.sala_id = s.id
       LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
       WHERE f.pelicula_id = $1 AND f.estado IN ('disponible', 'preventa') AND f.fecha >= CURRENT_DATE
-      GROUP BY f.id
+      GROUP BY f.id, s.nombre, s.capacidad_total
       ORDER BY f.fecha ASC, f.hora ASC
     `, [req.params.peliculaId]);
     res.json(rows);
@@ -54,13 +57,13 @@ export const obtenerAsientos = async (req, res) => {
 };
 
 export const crear = async (req, res) => {
-  const { pelicula_id, fecha, hora, sala, precio, estado } = req.body;
+  const { pelicula_id, fecha, hora, sala, sala_id, precio, estado } = req.body;
   if (!pelicula_id || !fecha || !hora || !precio)
     return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
   try {
     const { rows } = await pool.query(
-      'INSERT INTO funciones (pelicula_id, fecha, hora, sala, precio, estado) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
-      [pelicula_id, fecha, hora, sala || 'Sala 1', precio, estado || 'disponible']
+      'INSERT INTO funciones (pelicula_id, fecha, hora, sala_id, precio, estado) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+      [pelicula_id, fecha, hora, sala_id || null, precio, estado || 'disponible']
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -69,11 +72,11 @@ export const crear = async (req, res) => {
 };
 
 export const actualizar = async (req, res) => {
-  const { pelicula_id, fecha, hora, sala, precio, estado } = req.body;
+  const { pelicula_id, fecha, hora, sala, sala_id, precio, estado } = req.body;
   try {
     const { rows } = await pool.query(
-      'UPDATE funciones SET pelicula_id=$1, fecha=$2, hora=$3, sala=$4, precio=$5, estado=$6 WHERE id=$7 RETURNING *',
-      [pelicula_id, fecha, hora, sala, precio, estado, req.params.id]
+      'UPDATE funciones SET pelicula_id=$1, fecha=$2, hora=$3, sala_id=$4, precio=$5, estado=$6 WHERE id=$7 RETURNING *',
+      [pelicula_id, fecha, hora, sala_id || null, precio, estado, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ mensaje: 'Función no encontrada' });
     res.json(rows[0]);

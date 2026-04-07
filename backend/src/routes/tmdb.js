@@ -32,12 +32,41 @@ router.get('/buscar', verificarToken, soloAdmin, async (req, res) => {
       año: m.release_date?.slice(0, 4),
       descripcion: m.overview,
       imagen_url: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
+      duracion: m.runtime || '',
+      genero_ids: m.genre_ids || [],
     }));
     res.json(results || []);
   } catch (err) {
     res.status(500).json({ mensaje: 'Error buscando en TMDB', error: err.message });
   }
 });
+
+// GET /api/tmdb/detalles/:id — obtener detalles de una película
+router.get('/detalles/:id', verificarToken, soloAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const response = await fetch(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=es-ES`);
+    const m = await response.json();
+    const generos = m.genres?.map(g => g.name) || [];
+    res.json({
+      titulo: m.title,
+      titulo_original: m.original_title,
+      año: m.release_date?.slice(0, 4),
+      descripcion: m.overview,
+      imagen_url: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
+      duracion: m.runtime || '',
+      genero: generos[0] || '',
+      clasificacion: mapearClasificacion(m.adult),
+    });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error obteniendo detalles', error: err.message });
+  }
+});
+
+function mapearClasificacion(adult) {
+  if (adult) return '+18';
+  return 'Para todos';
+}
 
 // POST /api/tmdb/fix-images — corregir todas las imágenes automáticamente
 router.post('/fix-images', verificarToken, soloAdmin, async (req, res) => {

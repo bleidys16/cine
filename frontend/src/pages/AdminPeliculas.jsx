@@ -36,15 +36,38 @@ export default function AdminPeliculas() {
     finally { setBuscandoTmdb(false); }
   };
 
-  const seleccionarTmdb = (movie) => {
-    setForm(prev => ({
-      ...prev,
-      titulo: movie.titulo,
-      descripcion: movie.descripcion || prev.descripcion,
-      imagen_url: movie.imagen_url || prev.imagen_url,
-    }));
-    setTmdbResults([]);
-    setTmdbQuery('');
+  const seleccionarTmdb = async (movie) => {
+    setBuscandoTmdb(true);
+    try {
+      const { data } = await api.get(`/tmdb/detalles/${movie.id}`);
+      const generoMap = {
+        'Acción': 'Acción', 'Drama': 'Drama', 'Science Fiction': 'Ciencia Ficción',
+        'Comedy': 'Comedia', 'Horror': 'Terror', 'Musical': 'Musical',
+        'Romance': 'Romance', 'Animation': 'Animación', 'Documentary': 'Documental',
+        'Thriller': 'Suspenso', 'Adventure': 'Aventura', 'Fantasy': 'Drama',
+        'War': 'Drama', 'Crime': 'Suspenso', 'Family': 'Animación'
+      };
+      setForm(prev => ({
+        ...prev,
+        titulo: data.titulo,
+        descripcion: data.descripcion || prev.descripcion,
+        imagen_url: data.imagen_url || prev.imagen_url,
+        duracion: data.duracion || prev.duracion,
+        genero: generoMap[data.genero] || data.genero || prev.genero,
+        clasificacion: data.clasificacion || prev.clasificacion,
+      }));
+    } catch {
+      setForm(prev => ({
+        ...prev,
+        titulo: movie.titulo,
+        descripcion: movie.descripcion || prev.descripcion,
+        imagen_url: movie.imagen_url || prev.imagen_url,
+      }));
+    } finally {
+      setTmdbResults([]);
+      setTmdbQuery('');
+      setBuscandoTmdb(false);
+    }
   };
 
   const handleEdit = (p) => { setForm({ ...p }); setEditId(p.id); setShowForm(true); setError(''); setTmdbResults([]); };
@@ -145,11 +168,11 @@ export default function AdminPeliculas() {
                 </div>
                 <div className="form-group">
                   <label className="label">URL Imagen</label>
-                  <input className="input" value={form.imagen_url} onChange={e => setForm({ ...form, imagen_url: e.target.value })} placeholder="https://..." />
+                  <input className="input" value={form.imagen_url || ''} onChange={e => setForm({ ...form, imagen_url: e.target.value })} placeholder="https://..." />
                 </div>
                 <div className="form-group">
                   <label className="label">URL Trailer</label>
-                  <input className="input" value={form.trailer_url} onChange={e => setForm({ ...form, trailer_url: e.target.value })} placeholder="https://youtube.com/..." />
+                  <input className="input" value={form.trailer_url || ''} onChange={e => setForm({ ...form, trailer_url: e.target.value })} placeholder="https://youtube.com/..." />
                 </div>
                 {editId && (
                   <div className="form-group">

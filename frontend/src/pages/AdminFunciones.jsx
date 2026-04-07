@@ -4,11 +4,12 @@ import api from '../services/api';
 import { formatFecha } from '../utils/fecha.js';
 import styles from './AdminPeliculas.module.css';
 
-const EMPTY = { pelicula_id: '', fecha: '', hora: '', sala: 'Sala 1', precio: '', estado: 'disponible' };
+const EMPTY = { pelicula_id: '', fecha: '', hora: '', sala_id: '', precio: '', estado: 'disponible' };
 
 export default function AdminFunciones() {
   const [funciones, setFunciones] = useState([]);
   const [peliculas, setPeliculas] = useState([]);
+  const [salas, setSalas] = useState([]);
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -18,8 +19,8 @@ export default function AdminFunciones() {
 
   const cargar = () => {
     setCargando(true);
-    Promise.all([api.get('/funciones'), api.get('/peliculas/todas')])
-      .then(([f, p]) => { setFunciones(f.data); setPeliculas(p.data); })
+    Promise.all([api.get('/funciones'), api.get('/peliculas/todas'), api.get('/salas')])
+      .then(([f, p, s]) => { setFunciones(f.data); setPeliculas(p.data); setSalas(s.data); })
       .catch(console.error)
       .finally(() => setCargando(false));
   };
@@ -27,7 +28,7 @@ export default function AdminFunciones() {
   useEffect(() => { cargar(); }, []);
 
   const handleEdit = (f) => {
-    setForm({ pelicula_id: f.pelicula_id, fecha: f.fecha?.slice(0, 10), hora: f.hora?.slice(0, 5), sala: f.sala, precio: f.precio, estado: f.estado });
+    setForm({ pelicula_id: f.pelicula_id, fecha: f.fecha?.slice(0, 10), hora: f.hora?.slice(0, 5), sala_id: f.sala_id, precio: f.precio, estado: f.estado });
     setEditId(f.id); setShowForm(true); setError('');
   };
 
@@ -83,7 +84,10 @@ export default function AdminFunciones() {
               </div>
               <div className="form-group">
                 <label className="label">Sala</label>
-                <input className="input" value={form.sala} onChange={e => setForm({ ...form, sala: e.target.value })} />
+                <select className="input" value={form.sala_id} onChange={e => setForm({ ...form, sala_id: e.target.value })}>
+                  <option value="">Seleccionar sala...</option>
+                  {salas.map(s => <option key={s.id} value={s.id}>{s.nombre} ({s.capacidad_total} asientos)</option>)}
+                </select>
               </div>
               <div className="form-group">
                 <label className="label">Precio (COP) *</label>

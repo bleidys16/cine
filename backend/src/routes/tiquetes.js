@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { comprar, validar, listarMios, dashboard, listarPendientes, confirmarTiquete, rechazarTiquete } from '../controllers/tiquetesController.js';
+import { comprar, validar, listarMios, dashboard, listarPendientes, confirmarTiquete, rechazarTiquete } from '../controllers/tiqueteController.js';
 import { verificarToken, soloAdmin } from '../middleware/auth.js';
 const router = Router();
 router.post('/comprar', verificarToken, comprar);

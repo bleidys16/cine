@@ -309,7 +309,7 @@ export default function AdminPeliculas() {
                   <div className="form-group">
                     <label className="label">Estado</label>
                     <select className="input" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
-                      <option value="activa">En cartelera</option>
+                      <option value="activa">Activa</option>
                       <option value="preventa">Preventa</option>
                       <option value="proximamente">Próximamente</option>
                       <option value="inactiva">Inactiva</option>

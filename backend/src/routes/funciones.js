@@ -1,10 +1,14 @@
 import { Router } from 'express';
-import { listar, listarPorPelicula, obtenerAsientos, crear, actualizar } from '../controllers/funcionesController.js';
+import { listar, listarTodas, listarPorPelicula, obtenerAsientos, crear, actualizar } from '../controllers/funcionesController.js';
 import { verificarToken, soloAdmin } from '../middleware/auth.js';
+
 const router = Router();
+
 router.get('/', listar);
+router.get('/todas', verificarToken, soloAdmin, listarTodas);
 router.get('/pelicula/:peliculaId', listarPorPelicula);
 router.get('/:id/asientos', obtenerAsientos);
 router.post('/', verificarToken, soloAdmin, crear);
 router.put('/:id', verificarToken, soloAdmin, actualizar);
+
 export default router;

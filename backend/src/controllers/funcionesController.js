@@ -21,6 +21,26 @@ export const listar = async (req, res) => {
   }
 };
 
+export const listarTodas = async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT f.*, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion,
+        s.nombre as sala,
+        COUNT(DISTINCT af.asiento_id) AS asientos_ocupados,
+        s.capacidad_total - COUNT(DISTINCT af.asiento_id) AS asientos_disponibles
+      FROM funciones f
+      JOIN peliculas p ON f.pelicula_id = p.id
+      LEFT JOIN salas s ON f.sala_id = s.id
+      LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
+      GROUP BY f.id, p.titulo, p.imagen_url, p.genero, p.clasificacion, p.duracion, s.nombre, s.capacidad_total
+      ORDER BY f.fecha DESC, f.hora DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al obtener funciones', error: err.message });
+  }
+};
+
 export const listarPorPelicula = async (req, res) => {
   try {
     const { rows } = await pool.query(`

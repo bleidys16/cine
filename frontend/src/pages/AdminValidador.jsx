@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ScanLine, CheckCircle2, XCircle, AlertCircle, Search, Camera, CameraOff, Keyboard } from 'lucide-react';
+import { ScanLine, CheckCircle2, XCircle, AlertCircle, Search, Camera, CameraOff, Keyboard, Clock } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import api from '../services/api';
 import styles from './AdminValidador.module.css';
@@ -11,10 +11,8 @@ export default function AdminValidador() {
   const [modoEscaner, setModoEscaner] = useState(false);
   const [escaneando, setEscaneando] = useState(false);
   const [errorCamara, setErrorCamara] = useState('');
-  const scannerRef = useRef(null);
   const html5QrRef = useRef(null);
 
-  // Iniciar cámara
   useEffect(() => {
     if (modoEscaner) {
       setErrorCamara('');
@@ -25,14 +23,13 @@ export default function AdminValidador() {
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         async (decodedText) => {
-          // QR escaneado exitosamente
           await html5Qr.stop();
           setModoEscaner(false);
           setEscaneando(false);
           setCodigo(decodedText);
           validarCodigo(decodedText);
         },
-        () => {} // error silencioso mientras busca
+        () => {}
       ).then(() => {
         setEscaneando(true);
       }).catch(err => {
@@ -41,7 +38,6 @@ export default function AdminValidador() {
         console.error(err);
       });
     } else {
-      // Detener cámara si estaba activa
       if (html5QrRef.current && escaneando) {
         html5QrRef.current.stop().catch(() => {});
         setEscaneando(false);
@@ -81,18 +77,23 @@ export default function AdminValidador() {
     setErrorCamara('');
   };
 
+  // ── Mapas de icono y color incluyendo 'expirado' ─────────────────────────
   const iconMap = {
-    valido: <CheckCircle2 size={64} color="var(--green)" strokeWidth={1.5} />,
-    usado: <AlertCircle size={64} color="var(--accent)" strokeWidth={1.5} />,
-    cancelado: <XCircle size={64} color="var(--red)" strokeWidth={1.5} />,
-    invalido: <XCircle size={64} color="var(--red)" strokeWidth={1.5} />,
+    valido:    <CheckCircle2 size={64} color="var(--green)"  strokeWidth={1.5} />,
+    usado:     <AlertCircle  size={64} color="var(--accent)" strokeWidth={1.5} />,
+    cancelado: <XCircle      size={64} color="var(--red)"    strokeWidth={1.5} />,
+    invalido:  <XCircle      size={64} color="var(--red)"    strokeWidth={1.5} />,
+    expirado:  <Clock        size={64} color="var(--accent)" strokeWidth={1.5} />,
+    pendiente: <AlertCircle  size={64} color="#d4a843"       strokeWidth={1.5} />,
   };
 
   const colorMap = {
-    valido: 'var(--green)',
-    usado: 'var(--accent)',
+    valido:    'var(--green)',
+    usado:     'var(--accent)',
     cancelado: 'var(--red)',
-    invalido: 'var(--red)',
+    invalido:  'var(--red)',
+    expirado:  'var(--accent)',
+    pendiente: '#d4a843',
   };
 
   return (
@@ -105,7 +106,7 @@ export default function AdminValidador() {
       <div className={styles.center}>
         <div className={`card ${styles.scanner}`}>
 
-          {/* Tabs: Cámara / Manual */}
+          {/* Tabs */}
           <div className={styles.tabs}>
             <button
               className={`${styles.tab} ${modoEscaner ? styles.tabActive : ''}`}
@@ -121,7 +122,7 @@ export default function AdminValidador() {
             </button>
           </div>
 
-          {/* Vista de cámara */}
+          {/* Cámara */}
           {modoEscaner ? (
             <div className={styles.camaraWrap}>
               <div id="qr-reader" className={styles.qrReader} />
@@ -147,7 +148,6 @@ export default function AdminValidador() {
               </button>
             </div>
           ) : (
-            /* Vista manual */
             <>
               <div className={styles.scanIcon}>
                 <ScanLine size={32} color="var(--accent)" />
@@ -174,8 +174,25 @@ export default function AdminValidador() {
           {resultado && (
             <div className={styles.resultado}>
               <hr className="divider" />
-              <div className={styles.resultIcon}>{iconMap[resultado.estado] || iconMap.invalido}</div>
-              <h3 style={{ color: colorMap[resultado.estado], fontSize: '1.3rem' }}>{resultado.mensaje}</h3>
+              <div className={styles.resultIcon}>
+                {iconMap[resultado.estado] || iconMap.invalido}
+              </div>
+              <h3 style={{ color: colorMap[resultado.estado], fontSize: '1.3rem' }}>
+                {resultado.mensaje}
+              </h3>
+
+              {/* Aviso extra para tiquete expirado */}
+              {resultado.estado === 'expirado' && (
+                <div style={{
+                  marginTop: 8, padding: '10px 14px',
+                  background: 'rgba(212, 168, 67, 0.08)',
+                  border: '1px solid rgba(212, 168, 67, 0.2)',
+                  borderRadius: 8, fontSize: '0.82rem',
+                  color: 'var(--text-muted)', textAlign: 'center'
+                }}>
+                  ⏰ Los tiquetes solo pueden usarse hasta <strong>10 minutos</strong> después de iniciada la función.
+                </div>
+              )}
 
               {resultado.tiquete && (
                 <div className={styles.tiqueteInfo}>

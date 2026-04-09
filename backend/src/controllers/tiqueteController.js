@@ -38,7 +38,6 @@ export const comprar = async (req, res) => {
     const total = precio * asientos_ids.length;
     const codigo = 'PEND-' + nanoid(5).toUpperCase();
 
-    // Guardar el tiquete con el prefijo PEND- para evitar errores de restricción de base de datos
     const { rows: tiqRows } = await client.query(
       "INSERT INTO tiquetes (codigo, usuario_id, funcion_id, total) VALUES ($1,$2,$3,$4) RETURNING *",
       [codigo, usuario_id, funcion_id, total]
@@ -58,7 +57,6 @@ export const comprar = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Obtener detalles completos
     const { rows: detalles } = await pool.query(`
       SELECT a.fila, a.columna, a.numero, dt.precio_unitario
       FROM detalle_tiquete dt
@@ -73,8 +71,6 @@ export const comprar = async (req, res) => {
     `, [funcion_id]);
 
     const tiqueteCompleto = { ...tiquete, estado: 'pendiente', asientos: detalles, funcion: funcDetalle[0] };
-
-    // NOTA: El correo NO se envía aquí. Se envía cuando el admin lo aprueba en confirmarTiquete.
     res.status(201).json({ tiquete: tiqueteCompleto });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -108,16 +104,15 @@ export const listarPendientes = async (req, res) => {
 export const confirmarTiquete = async (req, res) => {
   const { id } = req.params;
   try {
-    // Primero obtenemos el tiquete para saber su código actual
     const { rows: tiqPre } = await pool.query("SELECT codigo FROM tiquetes WHERE id=$1", [id]);
     if (tiqPre.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
-    
-    // Le quitamos el PEND- al código
-    const nuevoCodigo = tiqPre[0].codigo.startsWith('PEND-') ? tiqPre[0].codigo.replace('PEND-', '') + nanoid(5).toUpperCase() : tiqPre[0].codigo;
-    // Nos aseguramos de que mida 10 caracteres. Si quitamos PEND-, quedan 5. Añadimos 5 randoms al final.
+
+    const nuevoCodigo = tiqPre[0].codigo.startsWith('PEND-')
+      ? tiqPre[0].codigo.replace('PEND-', '') + nanoid(5).toUpperCase()
+      : tiqPre[0].codigo;
 
     const { rows: tiqRows } = await pool.query(
-      "UPDATE tiquetes SET codigo=$1, estado='activo' WHERE id=$2 RETURNING *", 
+      "UPDATE tiquetes SET codigo=$1, estado='activo' WHERE id=$2 RETURNING *",
       [nuevoCodigo, id]
     );
     const tiquete = tiqRows[0];
@@ -164,13 +159,18 @@ export const rechazarTiquete = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// VALIDAR — con ventana de 10 minutos antes del inicio de la función
+// ─────────────────────────────────────────────────────────────────────────────
 export const validar = async (req, res) => {
   const { codigo } = req.body;
   if (!codigo) return res.status(400).json({ mensaje: 'Código requerido' });
 
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, f.fecha, f.hora, p.titulo
+      SELECT t.*, f.fecha, f.hora, p.titulo,
+        -- Combinamos fecha + hora en un timestamp para comparar
+        (f.fecha::date + f.hora::time) AS fecha_hora_funcion
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
       JOIN peliculas p ON p.id = f.pelicula_id
@@ -181,15 +181,40 @@ export const validar = async (req, res) => {
       return res.status(404).json({ valido: false, estado: 'invalido', mensaje: 'Código no encontrado' });
 
     const tiquete = rows[0];
+
+    // Verificar estados básicos primero
     if (tiquete.codigo.startsWith('PEND-'))
       return res.json({ valido: false, estado: 'pendiente', mensaje: 'Tiquete pendiente de confirmación administrativa', tiquete });
+
     if (tiquete.estado === 'usado')
       return res.json({ valido: false, estado: 'usado', mensaje: 'Tiquete ya fue utilizado', tiquete });
+
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
 
+    // ── Validación de ventana de tiempo ──────────────────────────────────────
+    // El tiquete solo es válido desde 60 min antes hasta 10 min ANTES de la función.
+    // Pasados los 10 minutos del inicio, ya no se puede usar.
+    const ahora = new Date();
+    const fechaHoraFuncion = new Date(tiquete.fecha_hora_funcion);
+
+    // Diferencia en minutos: positivo = la función aún no ha empezado
+    const diffMinutos = (fechaHoraFuncion - ahora) / (1000 * 60);
+
+    if (diffMinutos < -10) {
+      // Han pasado más de 10 minutos desde el inicio → tiquete expirado
+      return res.json({
+        valido: false,
+        estado: 'expirado',
+        mensaje: `El acceso ya no está permitido. La función empezó hace más de 10 minutos.`,
+        tiquete
+      });
+    }
+
+    // Todo OK → marcar como usado
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
     res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });
+
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al validar tiquete', error: err.message });
   }
@@ -218,39 +243,65 @@ export const listarMios = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD — con ingresos por sala agregados
+// ─────────────────────────────────────────────────────────────────────────────
 export const dashboard = async (req, res) => {
   try {
-    const [ventas, ocupacion, populares] = await Promise.all([
+    const [ventas, ocupacion, populares, ingresosSalas] = await Promise.all([
+      // Ventas últimos 7 días
       pool.query(`
         SELECT DATE(fecha_compra) as dia, COUNT(*) as cantidad, SUM(total) as total
         FROM tiquetes WHERE estado != 'cancelado' AND codigo NOT LIKE 'PEND-%'
         GROUP BY dia ORDER BY dia DESC LIMIT 7
       `),
+
+      // Ocupación de funciones próximas
       pool.query(`
         SELECT f.id, p.titulo, f.fecha, f.hora,
+          s.nombre as sala,
           COUNT(af.asiento_id) as ocupados,
-          150 - COUNT(af.asiento_id) as disponibles,
-          ROUND(COUNT(af.asiento_id)::numeric / 150 * 100, 1) as porcentaje
+          s.capacidad_total - COUNT(af.asiento_id) as disponibles,
+          ROUND(COUNT(af.asiento_id)::numeric / NULLIF(s.capacidad_total, 0) * 100, 1) as porcentaje
         FROM funciones f
         JOIN peliculas p ON p.id = f.pelicula_id
+        LEFT JOIN salas s ON s.id = f.sala_id
         LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
         WHERE f.fecha >= CURRENT_DATE
-        GROUP BY f.id, p.titulo, f.fecha, f.hora
+        GROUP BY f.id, p.titulo, f.fecha, f.hora, s.nombre, s.capacidad_total
         ORDER BY f.fecha ASC LIMIT 5
       `),
+
+      // Películas más populares por ingresos
       pool.query(`
         SELECT p.titulo, COUNT(t.id) as ventas, SUM(t.total) as ingresos
         FROM tiquetes t
         JOIN funciones f ON f.id = t.funcion_id
         JOIN peliculas p ON p.id = f.pelicula_id
         WHERE t.estado != 'cancelado' AND t.codigo NOT LIKE 'PEND-%'
-        GROUP BY p.titulo ORDER BY ventas DESC LIMIT 5
+        GROUP BY p.titulo ORDER BY ingresos DESC LIMIT 5
+      `),
+
+      // ── NUEVO: Ingresos por sala ──────────────────────────────────────────
+      pool.query(`
+        SELECT 
+          COALESCE(s.nombre, 'Sin sala') as sala,
+          COUNT(DISTINCT t.id) as tiquetes,
+          SUM(t.total) as ingresos,
+          COUNT(DISTINCT f.id) as funciones_realizadas
+        FROM tiquetes t
+        JOIN funciones f ON f.id = t.funcion_id
+        LEFT JOIN salas s ON s.id = f.sala_id
+        WHERE t.estado != 'cancelado' AND t.codigo NOT LIKE 'PEND-%'
+        GROUP BY s.nombre ORDER BY ingresos DESC
       `)
     ]);
+
     res.json({
       ventas_recientes: ventas.rows,
       ocupacion_funciones: ocupacion.rows,
-      peliculas_populares: populares.rows
+      peliculas_populares: populares.rows,
+      ingresos_salas: ingresosSalas.rows   // ← nuevo campo
     });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener dashboard', error: err.message });

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Check, DoorOpen } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { Plus, Pencil, Trash2, X, Check, Filter } from 'lucide-react';
 import api from '../services/api';
 import styles from './AdminPeliculas.module.css';
+import filterStyles from './AdminFiltros.module.css';
 
 const EMPTY = { nombre: '', filas: '', columnas: '', capacidad_total: '', estado: 'activa' };
 
@@ -14,12 +15,20 @@ export default function AdminSalas() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
 
+  // ── Filtro de estado ─────────────────────────────────────────────────────
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
+
   const cargar = () => {
     setCargando(true);
     api.get('/salas').then(r => setSalas(r.data)).catch(console.error).finally(() => setCargando(false));
   };
 
   useEffect(() => { cargar(); }, []);
+
+  const salasFiltradas = useMemo(() => {
+    if (filtroEstado === 'Todos') return salas;
+    return salas.filter(s => s.estado === filtroEstado);
+  }, [salas, filtroEstado]);
 
   const handleEdit = (s) => {
     setForm({ ...s, filas: String(s.filas), columnas: String(s.columnas), capacidad_total: String(s.capacidad_total) });
@@ -32,7 +41,12 @@ export default function AdminSalas() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setGuardando(true); setError('');
-    const data = { ...form, filas: parseInt(form.filas), columnas: parseInt(form.columnas), capacidad_total: parseInt(form.columnas) * parseInt(form.filas) };
+    const data = {
+      ...form,
+      filas: parseInt(form.filas),
+      columnas: parseInt(form.columnas),
+      capacidad_total: parseInt(form.columnas) * parseInt(form.filas)
+    };
     try {
       if (editId) await api.put(`/salas/${editId}`, data);
       else await api.post('/salas', data);
@@ -53,6 +67,42 @@ export default function AdminSalas() {
         <button className="btn btn-primary" onClick={handleNew}><Plus size={16} /> Nueva sala</button>
       </div>
 
+      {/* ── Filtro rápido por estado ─────────────────────────────────────── */}
+      <div className={`card ${filterStyles.filtrosPanel}`}>
+        <div className={filterStyles.filtrosHeader}>
+          <span className={filterStyles.filtrosTitle}><Filter size={15} /> Filtrar por estado</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {['Todos', 'activa', 'inactiva'].map(e => (
+            <button
+              key={e}
+              onClick={() => setFiltroEstado(e)}
+              style={{
+                padding: '5px 16px',
+                borderRadius: 20,
+                border: filtroEstado === e ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                background: filtroEstado === e ? 'rgba(201, 168, 76, 0.15)' : 'rgba(255,255,255,0.04)',
+                color: filtroEstado === e ? 'var(--accent)' : 'var(--text-muted)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              {e === 'Todos' ? 'Todas' : e === 'activa' ? '✅ Activas' : '⛔ Inactivas'}
+              <span style={{ marginLeft: 6, opacity: 0.6 }}>
+                ({e === 'Todos' ? salas.length : salas.filter(s => s.estado === e).length})
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className={filterStyles.filtrosFooter}>
+          <span className={filterStyles.resultCount}>
+            {salasFiltradas.length} sala{salasFiltradas.length !== 1 ? 's' : ''} encontrada{salasFiltradas.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Formulario ───────────────────────────────────────────────────── */}
       {showForm && (
         <div className={`card ${styles.formCard}`}>
           <div className={styles.formHeader}>
@@ -81,7 +131,9 @@ export default function AdminSalas() {
                 </select>
               </div>
               <div className="form-group" style={{ gridColumn: '1/-1' }}>
-                <label className="label">Capacidad calculada: {form.filas && form.columnas ? parseInt(form.filas) * parseInt(form.columnas) : 0} asientos</label>
+                <label className="label">
+                  Capacidad calculada: <strong>{form.filas && form.columnas ? parseInt(form.filas) * parseInt(form.columnas) : 0} asientos</strong>
+                </label>
               </div>
             </div>
             {error && <p className="error-msg">{error}</p>}
@@ -95,6 +147,7 @@ export default function AdminSalas() {
         </div>
       )}
 
+      {/* ── Tabla ────────────────────────────────────────────────────────── */}
       {cargando ? (
         <div style={{ textAlign: 'center', padding: '40px' }}><div className="spinner" style={{ margin: 'auto', width: 32, height: 32 }} /></div>
       ) : (
@@ -104,7 +157,14 @@ export default function AdminSalas() {
               <tr><th>Sala</th><th>Filas</th><th>Columnas</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr>
             </thead>
             <tbody>
-              {salas.map(s => (
+              {salasFiltradas.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                    No hay salas para mostrar
+                  </td>
+                </tr>
+              )}
+              {salasFiltradas.map(s => (
                 <tr key={s.id}>
                   <td><strong>{s.nombre}</strong></td>
                   <td>{s.filas}</td>

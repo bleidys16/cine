@@ -1,11 +1,21 @@
-import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Check, Search } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { Plus, Pencil, Trash2, X, Check, Search, Filter, ChevronDown } from 'lucide-react';
 import api from '../services/api';
 import styles from './AdminPeliculas.module.css';
+import filterStyles from './AdminFiltros.module.css';
 
 const EMPTY = { titulo: '', descripcion: '', duracion: '', genero: '', clasificacion: '', imagen_url: '', trailer_url: '', estado: 'activa' };
 const GENEROS = ['Acción', 'Drama', 'Ciencia Ficción', 'Comedia', 'Terror', 'Musical', 'Romance', 'Animación', 'Documental', 'Suspenso'];
 const CLASIF = ['Para todos', '+7', '+13', '+16', '+18'];
+
+// Mapa de estado → etiqueta legible
+const ESTADOS_PELICULA = [
+  { value: 'Todos', label: 'Todos' },
+  { value: 'activa', label: '🎬 En cartelera' },
+  { value: 'preventa', label: '🎟️ Preventa' },
+  { value: 'proximamente', label: '🔜 Próximamente' },
+  { value: 'inactiva', label: '⛔ Inactiva' },
+];
 
 export default function AdminPeliculas() {
   const [peliculas, setPeliculas] = useState([]);
@@ -19,12 +29,47 @@ export default function AdminPeliculas() {
   const [tmdbResults, setTmdbResults] = useState([]);
   const [buscandoTmdb, setBuscandoTmdb] = useState(false);
 
+  // ── Filtros ──────────────────────────────────────────────────────────────
+  const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
+  const [filtroGenero, setFiltroGenero] = useState('');
+
   const cargar = () => {
     setCargando(true);
     api.get('/peliculas/todas').then(r => setPeliculas(r.data)).catch(console.error).finally(() => setCargando(false));
   };
 
   useEffect(() => { cargar(); }, []);
+
+  // Géneros únicos que existen en la base de datos
+  const generosDisponibles = useMemo(() =>
+    [...new Set(peliculas.map(p => p.genero).filter(Boolean))].sort(),
+    [peliculas]
+  );
+
+  const peliculasFiltradas = useMemo(() => {
+    return peliculas.filter(p => {
+      if (filtroEstado !== 'Todos' && p.estado !== filtroEstado) return false;
+      if (filtroGenero && p.genero !== filtroGenero) return false;
+      if (filtroBusqueda && !p.titulo.toLowerCase().includes(filtroBusqueda.toLowerCase())) return false;
+      return true;
+    });
+  }, [peliculas, filtroEstado, filtroGenero, filtroBusqueda]);
+
+  const limpiarFiltros = () => {
+    setFiltroBusqueda('');
+    setFiltroEstado('Todos');
+    setFiltroGenero('');
+  };
+
+  const hayFiltrosActivos = filtroEstado !== 'Todos' || filtroGenero || filtroBusqueda;
+
+  // Conteo por estado para los chips
+  const conteos = useMemo(() => {
+    const c = { activa: 0, preventa: 0, proximamente: 0, inactiva: 0 };
+    peliculas.forEach(p => { if (c[p.estado] !== undefined) c[p.estado]++; });
+    return c;
+  }, [peliculas]);
 
   const buscarTmdb = async () => {
     if (!tmdbQuery.trim()) return;
@@ -92,6 +137,20 @@ export default function AdminPeliculas() {
     try { await api.delete(`/peliculas/${id}`); cargar(); } catch { alert('Error al eliminar'); }
   };
 
+  const estadoBadgeClass = (estado) => ({
+    activa: 'badge-green',
+    preventa: 'badge-gold',
+    proximamente: 'badge-blue',
+    inactiva: 'badge-gray'
+  }[estado] || 'badge-gray');
+
+  const estadoLabel = (estado) => ({
+    activa: 'En cartelera',
+    preventa: 'Preventa',
+    proximamente: 'Próximamente',
+    inactiva: 'Inactiva'
+  }[estado] || estado);
+
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
@@ -99,6 +158,78 @@ export default function AdminPeliculas() {
         <button className="btn btn-primary" onClick={handleNew}><Plus size={16} /> Nueva película</button>
       </div>
 
+      {/* ── Chips de estado rápido ──────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        {ESTADOS_PELICULA.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setFiltroEstado(value)}
+            style={{
+              padding: '5px 14px',
+              borderRadius: 20,
+              border: filtroEstado === value ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+              background: filtroEstado === value ? 'rgba(201, 168, 76, 0.15)' : 'rgba(255,255,255,0.04)',
+              color: filtroEstado === value ? 'var(--accent)' : 'var(--text-muted)',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s'
+            }}
+          >
+            {label}
+            {value !== 'Todos' && conteos[value] > 0 && (
+              <span style={{ marginLeft: 6, opacity: 0.7 }}>({conteos[value]})</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Panel de filtros ─────────────────────────────────────────────── */}
+      <div className={`card ${filterStyles.filtrosPanel}`}>
+        <div className={filterStyles.filtrosHeader}>
+          <span className={filterStyles.filtrosTitle}><Filter size={15} /> Filtros</span>
+          {hayFiltrosActivos && (
+            <button className="btn btn-ghost" style={{ fontSize: '0.8rem', padding: '4px 10px' }} onClick={limpiarFiltros}>
+              Limpiar
+            </button>
+          )}
+        </div>
+        <div className={filterStyles.filtrosGrid}>
+          {/* Busqueda */}
+          <div className={filterStyles.filtroItem} style={{ gridColumn: 'span 2' }}>
+            <label className={filterStyles.filtroLabel}>Buscar por título</label>
+            <div style={{ position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input
+                className="input"
+                style={{ paddingLeft: 32 }}
+                placeholder="Nombre de la película..."
+                value={filtroBusqueda}
+                onChange={e => setFiltroBusqueda(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Género */}
+          <div className={filterStyles.filtroItem}>
+            <label className={filterStyles.filtroLabel}>Género</label>
+            <div className={filterStyles.selectWrap}>
+              <select className="input" value={filtroGenero} onChange={e => setFiltroGenero(e.target.value)}>
+                <option value="">Todos los géneros</option>
+                {generosDisponibles.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+              <ChevronDown size={13} className={filterStyles.selectIcon} />
+            </div>
+          </div>
+        </div>
+        <div className={filterStyles.filtrosFooter}>
+          <span className={filterStyles.resultCount}>
+            {peliculasFiltradas.length} película{peliculasFiltradas.length !== 1 ? 's' : ''} encontrada{peliculasFiltradas.length !== 1 ? 's' : ''}
+            {hayFiltrosActivos && ` de ${peliculas.length} total`}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Formulario ───────────────────────────────────────────────────── */}
       {showForm && (
         <div className={`card ${styles.formCard}`}>
           <div className={styles.formHeader}>
@@ -178,14 +309,14 @@ export default function AdminPeliculas() {
                   <div className="form-group">
                     <label className="label">Estado</label>
                     <select className="input" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
-                      <option value="activa">Activa</option>
-                    <option value="preventa">Preventa</option>
+                      <option value="activa">En cartelera</option>
+                      <option value="preventa">Preventa</option>
+                      <option value="proximamente">Próximamente</option>
                       <option value="inactiva">Inactiva</option>
                     </select>
                   </div>
                 )}
               </div>
-              {/* Preview imagen */}
               {form.imagen_url && (
                 <div className={styles.imgPreview}>
                   <img src={form.imagen_url} alt="Preview" onError={e => e.target.style.display='none'} />
@@ -203,6 +334,7 @@ export default function AdminPeliculas() {
         </div>
       )}
 
+      {/* ── Tabla ────────────────────────────────────────────────────────── */}
       {cargando ? (
         <div style={{ textAlign: 'center', padding: '40px' }}><div className="spinner" style={{ margin: 'auto', width: 32, height: 32 }} /></div>
       ) : (
@@ -212,18 +344,31 @@ export default function AdminPeliculas() {
               <tr><th>Película</th><th>Género</th><th>Duración</th><th>Clasificación</th><th>Estado</th><th>Acciones</th></tr>
             </thead>
             <tbody>
-              {peliculas.map(p => (
+              {peliculasFiltradas.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                    {hayFiltrosActivos ? 'No hay películas con los filtros seleccionados' : 'No hay películas registradas'}
+                  </td>
+                </tr>
+              )}
+              {peliculasFiltradas.map(p => (
                 <tr key={p.id}>
                   <td>
                     <div className={styles.pelInfo}>
-                      {p.imagen_url && <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/tmdb/poster/${p.imagen_url.split('/w500/')[1] || p.imagen_url.split('/w342/')[1]}`} alt="" className={styles.thumb} onError={e => e.target.style.display='none'} />}
+                      {p.imagen_url && (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/tmdb/poster/${p.imagen_url.split('/w500/')[1] || p.imagen_url.split('/w342/')[1]}`}
+                          alt="" className={styles.thumb}
+                          onError={e => e.target.style.display='none'}
+                        />
+                      )}
                       <strong>{p.titulo}</strong>
                     </div>
                   </td>
                   <td>{p.genero || '—'}</td>
                   <td>{p.duracion} min</td>
                   <td>{p.clasificacion || '—'}</td>
-                  <td><span className={`badge ${p.estado === 'activa' ? 'badge-green' : p.estado === 'preventa' ? 'badge-gold' : 'badge-gray'}`}>{p.estado}</span></td>
+                  <td><span className={`badge ${estadoBadgeClass(p.estado)}`}>{estadoLabel(p.estado)}</span></td>
                   <td>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="btn btn-ghost" style={{ padding: '6px 10px' }} onClick={() => handleEdit(p)}><Pencil size={14} /></button>

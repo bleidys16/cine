@@ -70,8 +70,8 @@ export const enviarTiquete = async ({ email, nombre, tiquete }) => {
   const { codigo, total, funcion, asientos } = tiquete;
   const asientosStr = asientos?.map(a => `${a.fila}${a.columna}`).join(', ') || '';
   const fechaFormateada = funcion?.fecha
-    ? new Date(funcion.fecha + 'T00:00').toLocaleDateString('es-CO', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    ? new Date(funcion.fecha).toLocaleDateString('es-CO', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
     })
     : '';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${codigo}&bgcolor=ffffff&color=080b10&margin=10`;
@@ -136,8 +136,8 @@ export const enviarConfirmacionEntrada = async ({ email, nombre, tiquete }) => {
   const asientosStr = asientos?.map(a => `${a.fila}${a.columna}`).join(', ') || '';
   const horaEntrada = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   const fechaFormateada = funcion?.fecha
-    ? new Date(funcion.fecha + 'T00:00').toLocaleDateString('es-CO', {
-        weekday: 'long', day: 'numeric', month: 'long'
+    ? new Date(funcion.fecha).toLocaleDateString('es-CO', {
+        weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
       })
     : '';
 

@@ -191,8 +191,8 @@ export const validar = async (req, res) => {
         p.titulo, p.duracion,
         s.nombre as sala,
         u.nombre as usuario_nombre, u.email as usuario_email,
-        (f.fecha::date + f.hora::time) AS fecha_hora_inicio,
-        (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval) AS fecha_hora_fin
+        EXTRACT(EPOCH FROM ((CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota') - (f.fecha::date + f.hora::time))) / 60 AS min_desde_inicio,
+        EXTRACT(EPOCH FROM ((CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota') - (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval))) / 60 AS min_desde_fin
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
       JOIN peliculas p ON p.id = f.pelicula_id
@@ -219,14 +219,8 @@ export const validar = async (req, res) => {
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
 
     // ── Validación de ventana de tiempo ──────────────────────────────────────
-    const ahora = new Date();
-    const inicio = new Date(tiquete.fecha_hora_inicio);
-    const fin = new Date(tiquete.fecha_hora_fin);
-
-    // Minutos desde el inicio (positivo = aún no ha comenzado, negativo = ya comenzó)
-    const minDesdeInicio = (ahora - inicio) / (1000 * 60);
-    // Minutos desde el fin (positivo = ya terminó)
-    const minDesdeFin = (ahora - fin) / (1000 * 60);
+    const minDesdeInicio = parseFloat(tiquete.min_desde_inicio);
+    const minDesdeFin = parseFloat(tiquete.min_desde_fin);
 
     // Demasiado temprano: más de 15 min antes del inicio
     if (minDesdeInicio < -15) {
@@ -332,7 +326,7 @@ export const obtenerPerfilCliente = async (req, res) => {
         CASE
           WHEN t.codigo LIKE 'PEND-%' THEN 'pendiente'
           WHEN t.estado IN ('cancelado', 'usado') THEN 'expirado'
-          WHEN (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval) < NOW() THEN 'expirado'
+          WHEN (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval) < (CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota') THEN 'expirado'
           ELSE 'activo'
         END AS estado,
         json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos

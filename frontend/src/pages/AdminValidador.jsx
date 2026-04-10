@@ -29,7 +29,7 @@ export default function AdminValidador() {
           setCodigo(decodedText);
           validarCodigo(decodedText);
         },
-        () => {}
+        () => { }
       ).then(() => {
         setEscaneando(true);
       }).catch(err => {
@@ -39,14 +39,14 @@ export default function AdminValidador() {
       });
     } else {
       if (html5QrRef.current && escaneando) {
-        html5QrRef.current.stop().catch(() => {});
+        html5QrRef.current.stop().catch(() => { });
         setEscaneando(false);
       }
     }
 
     return () => {
       if (html5QrRef.current && escaneando) {
-        html5QrRef.current.stop().catch(() => {});
+        html5QrRef.current.stop().catch(() => { });
       }
     };
   }, [modoEscaner]);
@@ -79,20 +79,20 @@ export default function AdminValidador() {
 
   // ── Mapas de icono y color incluyendo 'expirado' ─────────────────────────
   const iconMap = {
-    valido:    <CheckCircle2 size={64} color="var(--green)"  strokeWidth={1.5} />,
-    usado:     <AlertCircle  size={64} color="var(--accent)" strokeWidth={1.5} />,
-    cancelado: <XCircle      size={64} color="var(--red)"    strokeWidth={1.5} />,
-    invalido:  <XCircle      size={64} color="var(--red)"    strokeWidth={1.5} />,
-    expirado:  <Clock        size={64} color="var(--accent)" strokeWidth={1.5} />,
-    pendiente: <AlertCircle  size={64} color="#d4a843"       strokeWidth={1.5} />,
+    valido: <CheckCircle2 size={64} color="var(--green)" strokeWidth={1.5} />,
+    usado: <AlertCircle size={64} color="var(--accent)" strokeWidth={1.5} />,
+    cancelado: <XCircle size={64} color="var(--red)" strokeWidth={1.5} />,
+    invalido: <XCircle size={64} color="var(--red)" strokeWidth={1.5} />,
+    expirado: <Clock size={64} color="var(--accent)" strokeWidth={1.5} />,
+    pendiente: <AlertCircle size={64} color="#d4a843" strokeWidth={1.5} />,
   };
 
   const colorMap = {
-    valido:    'var(--green)',
-    usado:     'var(--accent)',
+    valido: 'var(--green)',
+    usado: 'var(--accent)',
     cancelado: 'var(--red)',
-    invalido:  'var(--red)',
-    expirado:  'var(--accent)',
+    invalido: 'var(--red)',
+    expirado: 'var(--accent)',
     pendiente: '#d4a843',
   };
 
@@ -198,7 +198,7 @@ export default function AdminValidador() {
                 <div className={styles.tiqueteInfo}>
                   <div className={styles.infoRow}><span>Código</span><strong style={{ fontFamily: 'monospace', color: 'var(--accent)' }}>{resultado.tiquete.codigo}</strong></div>
                   <div className={styles.infoRow}><span>Película</span><strong>{resultado.tiquete.titulo}</strong></div>
-                  <div className={styles.infoRow}><span>Función</span><strong>{resultado.tiquete.fecha} — {resultado.tiquete.hora?.slice(0, 5)}</strong></div>
+                  <div className={styles.infoRow}><span>Función</span><strong>{new Date(resultado.tiquete.fecha).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })} — {resultado.tiquete.hora?.slice(0, 5)}</strong></div>
                   <div className={styles.infoRow}><span>Sala</span><strong>{resultado.tiquete.sala}</strong></div>
                   <div className={styles.infoRow}><span>Total</span><strong style={{ color: 'var(--accent)' }}>${Number(resultado.tiquete.total).toLocaleString('es-CO')}</strong></div>
                 </div>

@@ -1,11 +1,5 @@
 import styles from './SeatGrid.module.css';
 
-const SillaIcon = ({ className }) => (
-  <svg viewBox="0 0 20 20" fill="currentColor" className={className}>
-    <path d="M3 13v4h2v-4h10v4h2v-4h1v-5c0-1.1-.9-2-2-2h-1V5c0-1.7-1.3-3-3-3s-3 1.3-3 3v1H5c-1.1 0-2 .9-2 2v5h1z" />
-  </svg>
-);
-
 export default function SeatGrid({ asientos, seleccionados, onToggle }) {
   const filas = [...new Set(asientos.map(a => a.fila))].sort();
 
@@ -17,29 +11,29 @@ export default function SeatGrid({ asientos, seleccionados, onToggle }) {
 
   return (
     <div className={styles.wrap}>
-      {/* Pantalla minimalista */}
+      {/* Pantalla estilo Inspo (Arco blanco) */}
       <div className={styles.pantallaCurva}>
         <div className={styles.pantallaArco} />
-        <span className={styles.pantallaTexto}>Pantalla</span>
+        <span className={styles.pantallaTexto}>SCREEN</span>
       </div>
 
-      {/* Leyenda compacta */}
+      {/* Leyenda Inspo */}
       <div className={styles.leyenda}>
         <div className={styles.leyendaItem}>
-          <SillaIcon className={`${styles.iconLegend} ${styles.disponible}`} />
+          <div className={`${styles.seat} ${styles.disponible}`} style={{ pointerEvents: 'none' }} />
           Disponible
         </div>
         <div className={styles.leyendaItem}>
-          <SillaIcon className={`${styles.iconLegend} ${styles.seleccionado}`} />
+          <div className={`${styles.seat} ${styles.seleccionado}`} style={{ pointerEvents: 'none' }} />
           Seleccionado
         </div>
         <div className={styles.leyendaItem}>
-          <SillaIcon className={`${styles.iconLegend} ${styles.ocupado}`} />
+          <div className={`${styles.seat} ${styles.ocupado}`} style={{ pointerEvents: 'none' }} />
           Ocupado
         </div>
       </div>
 
-      {/* Grid con perspectiva ligera */}
+      {/* Grid compacta */}
       <div className={styles.gridContainer}>
         <div className={styles.grid}>
           {filas.map(fila => (
@@ -59,7 +53,6 @@ export default function SeatGrid({ asientos, seleccionados, onToggle }) {
                         className={`${styles.seat} ${styles[estado]}`}
                         onClick={() => onToggle(asiento.id)}
                       >
-                        <SillaIcon className={styles.chairSvg} />
                         <span className={styles.seatNum}>{asiento.columna}</span>
                       </button>
                     );

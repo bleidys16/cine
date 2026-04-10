@@ -28,14 +28,10 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-    callback(new Error(`CORS bloqueado: ${origin}`));
-  },
-  credentials: true
+  origin: true, // Permitir cualquier origen temporalmente para depurar CORS o usar el validador anterior
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -56,4 +52,4 @@ app.get('/api/test-email', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🎬 Servidor CineApp corriendo en puerto ${PORT}`);
 });
-// force deploy Fri Mar 27 18:00:00 UTC 2026
+// force deploy Sun Apr 10 10:48:00 UTC 2026

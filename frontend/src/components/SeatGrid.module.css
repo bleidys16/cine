@@ -2,274 +2,235 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 20px 16px;
-  background: linear-gradient(180deg, #1a1a1f 0%, #0f0f13 100%);
-  border-radius: 16px;
+  gap: 32px;
+  padding: 40px 24px;
+  background: radial-gradient(circle at 50% 0%, #1e1e24 0%, #0a0a0c 100%);
+  border-radius: 20px;
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+  overflow: hidden;
 }
 
-/* Pantalla curva */
+/* Pantalla curva con resplandor cinemático */
 .pantallaCurva {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  position: relative;
 }
 
 .pantallaArco {
-  width: 85%;
-  height: 12px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255,255,255,0.1) 10%,
-    rgba(255,255,255,0.3) 30%,
-    rgba(255,255,255,0.4) 50%,
-    rgba(255,255,255,0.3) 70%,
-    rgba(255,255,255,0.1) 90%,
-    transparent 100%
-  );
+  width: 90%;
+  height: 8px;
+  background: #ffffff;
   border-radius: 50% 50% 0 0;
-  position: relative;
   box-shadow: 
-    0 -4px 20px rgba(255,255,255,0.1),
-    0 -8px 40px rgba(255,255,255,0.05);
+    0 0 30px rgba(255,255,255,0.7),
+    0 0 60px rgba(212,168,67,0.3),
+    0 20px 80px rgba(255,255,255,0.2);
+  position: relative;
 }
 
-.pantallaArco::before {
+.pantallaArco::after {
   content: '';
   position: absolute;
-  top: -20px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  height: 30px;
-  background: linear-gradient(180deg, 
-    rgba(255,255,255,0.08) 0%,
-    transparent 100%
-  );
-  border-radius: 50% 50% 0 0;
-  filter: blur(8px);
+  width: 120%;
+  height: 150px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
 }
 
 .pantallaTexto {
-  margin-top: 8px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.25em;
-  color: #6b7280;
+  margin-top: 15px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: var(--text-muted);
   text-transform: uppercase;
+  opacity: 0.6;
 }
 
-/* Leyenda */
+/* Leyenda premium */
 .leyenda {
   display: flex;
-  gap: 24px;
+  gap: 30px;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 12px 24px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 24px;
+  padding: 14px 30px;
+  background: rgba(255,225,150,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
 }
 
 .leyendaItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: #9ca3af;
+  gap: 10px;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .asientoIcon {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px 4px 2px 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  position: relative;
 }
 
-.asientoIcon span {
-  font-size: 0.55rem;
-  font-weight: 700;
-}
+.dispIcon { background: #33363f; border: 1px solid #444; }
+.selIcon { background: var(--gold); box-shadow: 0 0 10px var(--gold-subtle); }
+.ocupIcon { background: #1a1a1a; opacity: 0.5; }
 
-/* Estados del icono */
-.dispIcon {
-  background: #374151;
-  border: 1px solid #4b5563;
-  color: #6b7280;
-}
-
-.selIcon {
-  background: #fbbf24;
-  color: #000;
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
-}
-
-.ocupIcon {
-  background: #1f2937;
-  border: 1px solid #374151;
-  color: #374151;
-}
-
-/* Grid de asientos con perspectiva */
+/* Contenedor del Grid */
 .gridContainer {
-  perspective: 800px;
+  perspective: 1500px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 20px 0;
 }
 
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   align-items: center;
-  transform: rotateX(5deg);
+  transform: rotateX(15deg);
   transform-origin: center top;
 }
 
-/* Cada fila con curva */
 .row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 20px;
   justify-content: center;
 }
 
-/* Curva de la sala - filas más anchas en el centro */
-.row:nth-child(1) { transform: translateX(0) scale(0.85); }
-.row:nth-child(2) { transform: translateX(0) scale(0.88); }
-.row:nth-child(3) { transform: translateX(0) scale(0.91); }
-.row:nth-child(4) { transform: translateX(0) scale(0.94); }
-.row:nth-child(5) { transform: translateX(0) scale(0.97); }
-.row:nth-child(6) { transform: translateX(0) scale(1); }
-.row:nth-child(7) { transform: translateX(0) scale(1.02); }
-.row:nth-child(8) { transform: translateX(0) scale(1.04); }
-.row:nth-child(9) { transform: translateX(0) scale(1.05); }
-.row:nth-child(10) { transform: translateX(0) scale(1.06); }
-
 .filaLabel {
-  width: 24px;
-  min-width: 24px;
+  width: 30px;
   text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #6b7280;
-  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  margin-right: 10px;
 }
 
 .seats {
   display: flex;
-  gap: 5px;
-  flex-wrap: nowrap;
+  gap: 12px;
 }
 
-/* Asiento estilo butaca de cine */
+/* ── LA BUTACA PRO (Mejorada) ── */
 .seat {
-  width: 28px;
-  height: 26px;
-  border-radius: 6px 6px 3px 3px;
+  width: 34px;
+  height: 32px;
+  background: transparent;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
 }
 
-/* Forma de butaca con respaldo */
+/* Respaldo (Backrest - Rectangular) */
 .seat::before {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-}
-
-.seatNum {
-  font-size: 0.6rem;
-  font-weight: 700;
-  pointer-events: none;
+  top: 0;
+  left: 3px;
+  right: 3px;
+  height: 24px;
+  background: #333842;
+  border-radius: 4px 4px 2px 2px;
+  box-shadow: 
+    inset 0 2px 3px rgba(255,255,255,0.05),
+    0 1px 2px rgba(0,0,0,0.5);
+  transition: all 0.2s;
   z-index: 1;
 }
 
-/* Estados de asientos */
-.disponible {
-  background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
-  color: #9ca3af;
-  cursor: pointer;
-  border: 1px solid #4b5563;
+/* Asiento/Cojín (Cushion - Rectangular con borde frontal) */
+.seat::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: #282c35;
+  border-radius: 2px 2px 4px 4px;
   box-shadow: 
-    0 2px 4px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.1);
+    0 4px 8px rgba(0,0,0,0.4),
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    0 2px 0 #1a1e24; /* El borde inferior de la silla */
+  transition: all 0.2s;
+  z-index: 2;
 }
 
+.seatNum {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.2);
+  z-index: 3;
+  transition: all 0.2s;
+}
+
+/* ESTADOS */
+
+/* Disponible - Carbón sofisticado */
 .disponible:hover {
-  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
-  border-color: #fbbf24;
-  color: #000;
-  transform: scale(1.15) translateY(-2px);
-  box-shadow: 
-    0 4px 12px rgba(251, 191, 36, 0.4),
-    inset 0 1px 0 rgba(255,255,255,0.3);
+  transform: scale(1.2) translateY(-4px);
+  z-index: 5;
 }
 
-.seleccionado {
-  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
-  color: #000;
-  cursor: pointer;
-  border: 1px solid #fbbf24;
-  transform: scale(1.1);
+.disponible:hover::before { background: #4a505e; }
+.disponible:hover::after { background: #3a3f4b; }
+.disponible:hover .seatNum { color: rgba(255,255,255,0.6); }
+
+/* Seleccionado - Terciopelo Dorado */
+.seleccionado::before {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
   box-shadow: 
-    0 3px 10px rgba(251, 191, 36, 0.5),
-    inset 0 1px 0 rgba(255,255,255,0.3);
+    inset 0 1px 4px rgba(255,255,255,0.3),
+    0 0 15px rgba(212,168,67,0.4);
 }
+.seleccionado::after {
+  background: linear-gradient(135deg, var(--gold-dim) 0%, #8a6d25 100%);
+}
+.seleccionado .seatNum { color: #000; opacity: 0.7; }
 
 .seleccionado:hover {
-  background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
-  transform: scale(1.08);
+  transform: scale(1.15) translateY(-2px);
 }
 
+/* Ocupado - Desaturado y hundido */
 .ocupado {
-  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
-  color: #374151;
   cursor: not-allowed;
-  border: 1px solid #1f2937;
-  opacity: 0.5;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  opacity: 0.4;
 }
+.ocupado::before { background: #1a1b1e; box-shadow: none; }
+.ocupado::after { background: #141517; box-shadow: none; }
+.ocupado .seatNum { display: none; }
 
 /* Responsive */
 @media (max-width: 640px) {
-  .seat {
-    width: 24px;
-    height: 22px;
-  }
-  
-  .seatNum {
-    font-size: 0.5rem;
-  }
-  
-  .seats {
-    gap: 4px;
-  }
-  
-  .filaLabel {
-    width: 20px;
-    font-size: 0.65rem;
-  }
-  
-  .row:nth-child(n) {
-    transform: scale(0.9);
-  }
+  .wrap { padding: 24px 12px; gap: 20px; }
+  .grid { transform: rotateX(8deg); }
+  .seat { width: 26px; height: 24px; }
+  .seat::before { height: 18px; }
+  .seat::after { height: 10px; }
+  .filaLabel { width: 20px; font-size: 0.65rem; }
+  .seats { gap: 4px; }
 }

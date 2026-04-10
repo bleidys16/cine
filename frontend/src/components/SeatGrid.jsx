@@ -20,15 +20,15 @@ export default function SeatGrid({ asientos, seleccionados, onToggle }) {
       {/* Leyenda */}
       <div className={styles.leyenda}>
         <div className={styles.leyendaItem}>
-          <div className={`${styles.asientoIcon} ${styles.dispIcon}`}><span>1</span></div>
+          <div className={`${styles.seat} ${styles.disponible}`} style={{ pointerEvents: 'none', transform: 'scale(0.6)' }}><span className={styles.seatNum}>1</span></div>
           Disponible
         </div>
         <div className={styles.leyendaItem}>
-          <div className={`${styles.asientoIcon} ${styles.selIcon}`}><span>1</span></div>
+          <div className={`${styles.seat} ${styles.seleccionado}`} style={{ pointerEvents: 'none', transform: 'scale(0.6)' }}><span className={styles.seatNum}>1</span></div>
           Seleccionado
         </div>
         <div className={styles.leyendaItem}>
-          <div className={`${styles.asientoIcon} ${styles.ocupIcon}`}><span>1</span></div>
+          <div className={`${styles.seat} ${styles.ocupado}`} style={{ pointerEvents: 'none', transform: 'scale(0.6)' }}></div>
           Ocupado
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { comprar, validar, listarMios, obtenerPerfilCliente, limpiarHistorialCliente, dashboard, resetDashboard, listarPendientes, confirmarTiquete, rechazarTiquete } from '../controllers/tiqueteController.js';
+import { comprar, validar, listarMios, obtenerPerfilCliente, limpiarHistorialCliente, dashboard, resetDashboard, listarPendientes, confirmarTiquete, rechazarTiquete, eliminarTiqueteDefinitivo } from '../controllers/tiqueteController.js';
 import { verificarToken, soloAdmin } from '../middleware/auth.js';
 const router = Router();
 router.post('/comprar', verificarToken, comprar);
@@ -12,4 +12,5 @@ router.delete('/reset-stats', verificarToken, soloAdmin, resetDashboard);
 router.get('/pendientes', verificarToken, soloAdmin, listarPendientes);
 router.put('/:id/confirmar', verificarToken, soloAdmin, confirmarTiquete);
 router.put('/:id/rechazar', verificarToken, soloAdmin, rechazarTiquete);
+router.delete('/:id', verificarToken, soloAdmin, eliminarTiqueteDefinitivo);
 export default router;

@@ -93,9 +93,9 @@ export const listarPendientes = async (req, res) => {
       JOIN peliculas p ON p.id = f.pelicula_id
       JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
       JOIN asientos a ON a.id = dt.asiento_id
-      WHERE t.codigo LIKE 'PEND-%' AND t.estado != 'cancelado'
+      WHERE t.estado != 'cancelado'
       GROUP BY t.id, u.nombre, u.email, p.titulo, f.fecha, f.hora
-      ORDER BY t.fecha_compra ASC
+      ORDER BY t.fecha_compra DESC
     `);
     res.json(rows);
   } catch (err) {
@@ -154,12 +154,24 @@ export const confirmarTiquete = async (req, res) => {
 
 export const rechazarTiquete = async (req, res) => {
   const { id } = req.params;
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query("UPDATE tiquetes SET estado='cancelado' WHERE id=$1 RETURNING *", [id]);
-    if (rows.length === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
-    res.json({ mensaje: 'Tiquete cancelado exitosamente', tiquete: rows[0] });
+    await client.query('BEGIN');
+    // Liberar los asientos para futuras compras
+    await client.query('DELETE FROM asientos_funcion WHERE tiquete_id=$1', [id]);
+    
+    const { rows } = await client.query("UPDATE tiquetes SET estado='cancelado' WHERE id=$1 RETURNING *", [id]);
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    }
+    await client.query('COMMIT');
+    res.json({ mensaje: 'Tiquete cancelado y asientos liberados exitosamente', tiquete: rows[0] });
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ mensaje: 'Error al cancelar', error: err.message });
+  } finally {
+    client.release();
   }
 };
 
@@ -227,22 +239,12 @@ export const validar = async (req, res) => {
       });
     }
 
-    // Ya terminó la película y el tiquete no fue usado → expirado
-    if (minDesdeFin > 0) {
+    // Faltan menos de 30 minutos para el final o la película ya terminó → expirado
+    if (minDesdeFin > -30) {
       return res.json({
         valido: false,
         estado: 'expirado',
-        mensaje: 'La función ya terminó. Este tiquete ha expirado.',
-        tiquete
-      });
-    }
-
-    // Pasaron más de 10 min desde el inicio → expirado (no dejaron entrar a tiempo)
-    if (minDesdeInicio > 10) {
-      return res.json({
-        valido: false,
-        estado: 'expirado',
-        mensaje: 'El tiempo de acceso ha vencido. La función comenzó hace más de 10 minutos.',
+        mensaje: 'Acceso denegado. Faltan menos de 30 minutos para que termine la película o ya finalizó.',
         tiquete
       });
     }
@@ -404,13 +406,20 @@ export const dashboard = async (req, res) => {
         FROM funciones f
         JOIN peliculas p ON p.id = f.pelicula_id
         LEFT JOIN salas s ON s.id = f.sala_id
-        LEFT JOIN asientos_funcion af ON af.funcion_id = f.id
-        WHERE f.fecha >= CURRENT_DATE
+        LEFT JOIN (
+           SELECT af_i.funcion_id, af_i.asiento_id 
+           FROM asientos_funcion af_i 
+           JOIN tiquetes tiq ON tiq.id = af_i.tiquete_id 
+           WHERE tiq.estado != 'cancelado'
+        ) af ON af.funcion_id = f.id
+        WHERE f.fecha >= CURRENT_DATE AND p.estado = 'activa' AND f.estado = 'disponible'
         GROUP BY f.id, p.titulo, f.fecha, f.hora, s.nombre, s.capacidad_total
-        ORDER BY f.fecha ASC LIMIT 5
+        ORDER BY ocupados DESC, f.fecha ASC, f.hora ASC LIMIT 5
       `),
       pool.query(`
-        SELECT p.titulo, COUNT(t.id) as ventas, SUM(t.total) as ingresos
+        SELECT p.titulo, 
+               SUM((SELECT COUNT(*) FROM detalle_tiquete dt WHERE dt.tiquete_id = t.id))::int as ventas, 
+               SUM(t.total) as ingresos
         FROM tiquetes t
         JOIN funciones f ON f.id = t.funcion_id
         JOIN peliculas p ON p.id = f.pelicula_id
@@ -420,7 +429,7 @@ export const dashboard = async (req, res) => {
       pool.query(`
         SELECT
           COALESCE(s.nombre, 'Sin sala') as sala,
-          COUNT(DISTINCT t.id) as tiquetes,
+          SUM((SELECT COUNT(*) FROM detalle_tiquete dt WHERE dt.tiquete_id = t.id))::int as tiquetes,
           SUM(t.total) as ingresos,
           COUNT(DISTINCT f.id) as funciones_realizadas
         FROM tiquetes t
@@ -454,6 +463,25 @@ export const resetDashboard = async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ mensaje: 'Error al reiniciar dashboard', error: err.message });
+  } finally {
+    client.release();
+  }
+};
+
+export const eliminarTiqueteDefinitivo = async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM asientos_funcion WHERE tiquete_id = $1', [id]);
+    await client.query('DELETE FROM detalle_tiquete WHERE tiquete_id = $1', [id]);
+    const { rowCount } = await client.query('DELETE FROM tiquetes WHERE id = $1', [id]);
+    await client.query('COMMIT');
+    if (rowCount === 0) return res.status(404).json({ mensaje: 'Tiquete no encontrado' });
+    res.json({ mensaje: 'Tiquete eliminado del sistema exitosamente' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ mensaje: 'Error al eliminar tiquete', error: err.message });
   } finally {
     client.release();
   }

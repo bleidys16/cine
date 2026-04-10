@@ -2,190 +2,137 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
-  padding: 40px 24px;
-  background: radial-gradient(circle at 50% 0%, #1e1e24 0%, #0a0a0c 100%);
-  border-radius: 20px;
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
-  overflow: hidden;
+  gap: 20px;
+  padding: 24px 16px;
+  background: var(--bg-surface);
+  border-radius: 12px;
 }
 
-/* Pantalla curva con resplandor cinemático */
+/* Pantalla minimalista */
 .pantallaCurva {
-  width: 100%;
-  max-width: 700px;
+  width: 80%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
-  position: relative;
+  margin-bottom: 10px;
 }
 
 .pantallaArco {
-  width: 90%;
-  height: 8px;
-  background: #ffffff;
-  border-radius: 50% 50% 0 0;
-  box-shadow: 
-    0 0 30px rgba(255,255,255,0.7),
-    0 0 60px rgba(212,168,67,0.3),
-    0 20px 80px rgba(255,255,255,0.2);
-  position: relative;
-}
-
-.pantallaArco::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120%;
-  height: 150px;
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, transparent 70%);
-  filter: blur(20px);
-  pointer-events: none;
+  width: 100%;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.05);
 }
 
 .pantallaTexto {
-  margin-top: 15px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.4em;
+  margin-top: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   color: var(--text-muted);
   text-transform: uppercase;
-  opacity: 0.6;
 }
 
-/* Leyenda premium */
+/* Leyenda compacta */
 .leyenda {
   display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
+  gap: 16px;
   justify-content: center;
-  padding: 14px 30px;
-  background: rgba(255,225,150,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 30px;
-  backdrop-filter: blur(4px);
+  padding: 8px 16px;
 }
 
 .leyendaItem {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.825rem;
-  font-weight: 500;
+  gap: 8px;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
-.asientoIcon {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  position: relative;
-}
-
-.dispIcon { background: #33363f; border: 1px solid #444; }
-.selIcon { background: var(--gold); box-shadow: 0 0 10px var(--gold-subtle); }
-.ocupIcon { background: #1a1a1a; opacity: 0.5; }
-
 /* Contenedor del Grid */
 .gridContainer {
-  perspective: 1500px;
   width: 100%;
-  padding: 20px 0;
 }
 
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
-  transform: rotateX(15deg);
-  transform-origin: center top;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 20px;
-  justify-content: center;
+  gap: 8px;
 }
 
 .filaLabel {
-  width: 30px;
+  width: 20px;
   text-align: center;
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--text-muted);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  margin-right: 10px;
 }
 
 .seats {
   display: flex;
-  gap: 12px;
+  gap: 4px;
 }
 
-/* ── LA BUTACA PRO (Mejorada) ── */
+/* ── LA BUTACA MINI ── */
 .seat {
-  width: 34px;
-  height: 32px;
-  background: transparent;
-  border: none;
+  width: 20px;
+  height: 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px 4px 2px 2px;
   position: relative;
   cursor: pointer;
   padding: 0;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  outline: none;
+  transition: all 0.1s;
 }
 
-/* Respaldo (Backrest - Rectangular) */
+/* Pequeño indicativo de respaldo */
 .seat::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 3px;
-  right: 3px;
-  height: 24px;
-  background: #333842;
-  border-radius: 4px 4px 2px 2px;
-  box-shadow: 
-    inset 0 2px 3px rgba(255,255,255,0.05),
-    0 1px 2px rgba(0,0,0,0.5);
-  transition: all 0.2s;
-  z-index: 1;
-}
-
-/* Asiento/Cojín (Cushion - Rectangular con borde frontal) */
-.seat::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
-  height: 14px;
-  background: #282c35;
-  border-radius: 2px 2px 4px 4px;
-  box-shadow: 
-    0 4px 8px rgba(0,0,0,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.1),
-    0 2px 0 #1a1e24; /* El borde inferior de la silla */
-  transition: all 0.2s;
-  z-index: 2;
+  height: 3px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px 4px 0 0;
 }
 
 .seatNum {
-  position: absolute;
-  top: 7px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.6rem;
-  font-weight: 800;
-  color: rgba(255,255,255,0.2);
-  z-index: 3;
-  transition: all 0.2s;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  pointer-events: none;
 }
+
+/* ESTADOS */
+.disponible:hover {
+  background: var(--bg-overlay);
+  border-color: var(--accent);
+}
+
+.seleccionado {
+  background: var(--gold);
+  border-color: var(--gold-strong);
+}
+.seleccionado .seatNum { color: #000; }
+
+.ocupado {
+  background: #1a1a1e;
+  border-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+.ocupado .seatNum { display: none; }
 
 /* ESTADOS */
 

@@ -1,135 +1,190 @@
 .main { padding-top: 60px; min-height: 100vh; }
 
-/* Backdrop difuminado */
 .backdrop {
   position: fixed; top: 0; left: 0; right: 0;
-  height: 55vh; z-index: 0; overflow: hidden;
+  height: 60vh; z-index: 0; overflow: hidden;
 }
 .backdrop img {
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: blur(28px) brightness(0.18);
-  transform: scale(1.1);
+  filter: blur(32px) brightness(0.15);
+  transform: scale(1.12);
 }
 .backdropOverlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(10,10,10,0.2) 0%, var(--bg-base) 72%);
+  background: linear-gradient(to bottom, rgba(10,10,10,0.1) 0%, var(--bg-base) 70%);
 }
 
-.content { position: relative; z-index: 1; padding-top: 32px; padding-bottom: 80px; }
-.back { margin-bottom: 24px; }
+.content { position: relative; z-index: 1; padding-top: 28px; padding-bottom: 80px; }
+.back { margin-bottom: 28px; }
 
-/* Info película */
-.info {
+/* ── Hero ── */
+.hero {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 32px;
+  grid-template-columns: 160px 1fr;
+  gap: 28px;
   margin-bottom: 48px;
   align-items: start;
 }
-.poster {
-  border-radius: var(--radius-lg);
+.posterWrap {
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
 }
-.poster img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+.posterImg { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
 
-.details { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
-.titulo { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
-.meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; max-width: 500px; }
+.heroInfo { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.titulo {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+.metaRow { display: flex; gap: 12px; align-items: center; }
+.metaItem {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.82rem; color: var(--text-muted);
+}
+.desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  max-width: 520px;
+}
 
-/* Sección funciones */
-.secTitle { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: var(--text-primary); }
+/* ── Sección funciones ── */
+.funcionesSection { margin-top: 8px; }
+.secTitle {
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  letter-spacing: 0.01em;
+}
 
+/* ── Selector de fechas ── */
+.fechaNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 24px;
+}
+.fechas { display: flex; gap: 4px; flex: 1; }
+
+.fechaBtn {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+.fechaBtn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.fechaBtnActive {
+  background: var(--accent, #c9a84c) !important;
+  color: #000 !important;
+  border-color: transparent;
+}
+.fechaDia { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; }
+.fechaBtnActive .fechaDia { opacity: 0.7; }
+.fechaNum { font-size: 1.2rem; font-weight: 700; line-height: 1; }
+.fechaMes { font-size: 0.62rem; opacity: 0.6; }
+
+.navArrow {
+  width: 32px; height: 32px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: none; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.navArrow:hover:not(:disabled) { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.navArrow:disabled { opacity: 0.25; cursor: not-allowed; }
+
+/* ── Salas y horarios ── */
+.salas { display: flex; flex-direction: column; gap: 4px; }
+
+.salaGroup {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.salaHeader {
+  display: flex; align-items: center; gap: 7px;
+  padding: 11px 16px;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+
+.horarios {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 14px 16px;
+}
+
+.horarioBtn {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 5px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 110px;
+}
+.horarioBtn:hover:not(:disabled) {
+  border-color: var(--accent, #c9a84c);
+  background: rgba(201,168,76,0.07);
+}
+.horarioAgotado { opacity: 0.35; cursor: not-allowed; }
+
+.horarioHora {
+  font-size: 0.9rem; font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.horarioInfo { display: flex; align-items: center; gap: 8px; }
+.horarioPrecio {
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--accent, #c9a84c);
+}
+.horarioAsientos {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 0.68rem; color: var(--text-muted);
+}
+
+/* ── Sin funciones ── */
 .noFunciones {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 48px; color: var(--text-muted); text-align: center;
-  border: 1px dashed var(--border); border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px; color: var(--text-muted);
+  border: 1px dashed var(--border); border-radius: 12px;
   font-size: 0.86rem;
 }
 
-.funciones { display: flex; flex-direction: column; gap: 8px; }
-
-/* Card de función — layout limpio tipo fila de tabla */
-.funcionCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  gap: 16px;
-  transition: background 0.15s, border-color 0.15s;
-  cursor: pointer;
-}
-.funcionCard:hover {
-  background: var(--bg-elevated);
-  border-color: var(--border-strong);
-}
-
-/* Lado izquierdo — fecha + hora + sala */
-.funcionInfo { display: flex; align-items: center; gap: 20px; }
-
-.funcionFechaHora { display: flex; flex-direction: column; gap: 3px; }
-.funcionFecha {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: capitalize;
-}
-/* Hora — tamaño normal, no gigante */
-.funcionHora {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  line-height: 1;
-}
-
-.funcionMeta { display: flex; gap: 6px; align-items: center; }
-
-/* Lado derecho — disponibles + precio + botón */
-.funcionRight {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-shrink: 0;
-}
-
-.disponibles {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  text-align: right;
-}
-.disponiblesNum {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-/* Precio — el dato más importante del lado derecho */
-.precio { text-align: right; }
-.precioLabel {
-  display: block;
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  margin-bottom: 1px;
-}
-.precioVal {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .info { grid-template-columns: 140px 1fr; gap: 20px; }
-  .funcionCard { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .funcionRight { width: 100%; justify-content: space-between; }
-  .funcionInfo { flex-wrap: wrap; gap: 12px; }
+  .hero { grid-template-columns: 120px 1fr; gap: 16px; }
+  .fechas { gap: 2px; }
+  .fechaBtn { padding: 8px 4px; }
+  .fechaNum { font-size: 1rem; }
+  .horarios { gap: 6px; }
+  .horarioBtn { min-width: 95px; }
 }
-
 @media (max-width: 480px) {
-  .info { grid-template-columns: 1fr; }
-  .poster { max-width: 140px; }
+  .hero { grid-template-columns: 1fr; }
+  .posterWrap { max-width: 130px; }
 }

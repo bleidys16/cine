@@ -1,6 +1,6 @@
 import pool from '../db/connection.js';
 import { nanoid } from 'nanoid';
-import { enviarTiquete } from '../services/emailService.js';
+import { enviarTiquete, enviarConfirmacionEntrada } from '../services/emailService.js';
 
 export const comprar = async (req, res) => {
   const { funcion_id, asientos_ids } = req.body;
@@ -65,8 +65,10 @@ export const comprar = async (req, res) => {
     `, [tiquete.id]);
 
     const { rows: funcDetalle } = await pool.query(`
-      SELECT f.fecha, f.hora, p.titulo
-      FROM funciones f JOIN peliculas p ON p.id = f.pelicula_id
+      SELECT f.fecha, f.hora, p.titulo, s.nombre as sala
+      FROM funciones f
+      JOIN peliculas p ON p.id = f.pelicula_id
+      LEFT JOIN salas s ON s.id = f.sala_id
       WHERE f.id = $1
     `, [funcion_id]);
 
@@ -125,8 +127,10 @@ export const confirmarTiquete = async (req, res) => {
     `, [tiquete.id]);
 
     const { rows: funcDetalle } = await pool.query(`
-      SELECT f.fecha, f.hora, p.titulo
-      FROM funciones f JOIN peliculas p ON p.id = f.pelicula_id
+      SELECT f.fecha, f.hora, p.titulo, s.nombre as sala
+      FROM funciones f
+      JOIN peliculas p ON p.id = f.pelicula_id
+      LEFT JOIN salas s ON s.id = f.sala_id
       WHERE f.id = $1
     `, [tiquete.funcion_id]);
 
@@ -160,7 +164,9 @@ export const rechazarTiquete = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VALIDAR — con ventana de 10 minutos antes del inicio de la función
+// VALIDAR — ventana: desde 15 min ANTES hasta 10 min DESPUÉS del inicio
+// Si el tiquete no fue usado y la función ya terminó → expirado
+// Al validar exitosamente → envía email de confirmación de entrada
 // ─────────────────────────────────────────────────────────────────────────────
 export const validar = async (req, res) => {
   const { codigo } = req.body;
@@ -168,12 +174,18 @@ export const validar = async (req, res) => {
 
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, f.fecha, f.hora, p.titulo,
-        -- Combinamos fecha + hora en un timestamp para comparar
-        (f.fecha::date + f.hora::time) AS fecha_hora_funcion
+      SELECT t.*,
+        f.fecha, f.hora, f.pelicula_id,
+        p.titulo, p.duracion,
+        s.nombre as sala,
+        u.nombre as usuario_nombre, u.email as usuario_email,
+        (f.fecha::date + f.hora::time) AS fecha_hora_inicio,
+        (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval) AS fecha_hora_fin
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
       JOIN peliculas p ON p.id = f.pelicula_id
+      LEFT JOIN salas s ON s.id = f.sala_id
+      LEFT JOIN usuarios u ON u.id = t.usuario_id
       WHERE t.codigo = $1
     `, [codigo.toUpperCase()]);
 
@@ -182,38 +194,85 @@ export const validar = async (req, res) => {
 
     const tiquete = rows[0];
 
-    // Verificar estados básicos primero
+    // Estado pendiente
     if (tiquete.codigo.startsWith('PEND-'))
       return res.json({ valido: false, estado: 'pendiente', mensaje: 'Tiquete pendiente de confirmación administrativa', tiquete });
 
+    // Ya usado
     if (tiquete.estado === 'usado')
-      return res.json({ valido: false, estado: 'usado', mensaje: 'Tiquete ya fue utilizado', tiquete });
+      return res.json({ valido: false, estado: 'usado', mensaje: 'Este tiquete ya fue utilizado', tiquete });
 
+    // Cancelado
     if (tiquete.estado === 'cancelado')
       return res.json({ valido: false, estado: 'cancelado', mensaje: 'Tiquete cancelado', tiquete });
 
     // ── Validación de ventana de tiempo ──────────────────────────────────────
-    // El tiquete solo es válido desde 60 min antes hasta 10 min ANTES de la función.
-    // Pasados los 10 minutos del inicio, ya no se puede usar.
     const ahora = new Date();
-    const fechaHoraFuncion = new Date(tiquete.fecha_hora_funcion);
+    const inicio = new Date(tiquete.fecha_hora_inicio);
+    const fin = new Date(tiquete.fecha_hora_fin);
 
-    // Diferencia en minutos: positivo = la función aún no ha empezado
-    const diffMinutos = (fechaHoraFuncion - ahora) / (1000 * 60);
+    // Minutos desde el inicio (positivo = aún no ha comenzado, negativo = ya comenzó)
+    const minDesdeInicio = (ahora - inicio) / (1000 * 60);
+    // Minutos desde el fin (positivo = ya terminó)
+    const minDesdeFin = (ahora - fin) / (1000 * 60);
 
-    if (diffMinutos < -10) {
-      // Han pasado más de 10 minutos desde el inicio → tiquete expirado
+    // Demasiado temprano: más de 15 min antes del inicio
+    if (minDesdeInicio < -15) {
+      const minutosRestantes = Math.ceil(-minDesdeInicio - 15);
       return res.json({
         valido: false,
-        estado: 'expirado',
-        mensaje: `El acceso ya no está permitido. La función empezó hace más de 10 minutos.`,
+        estado: 'muy_temprano',
+        mensaje: `Aún no puedes ingresar. Faltan ${minutosRestantes} minuto${minutosRestantes !== 1 ? 's' : ''} para que abra el acceso.`,
         tiquete
       });
     }
 
-    // Todo OK → marcar como usado
+    // Ya terminó la película y el tiquete no fue usado → expirado
+    if (minDesdeFin > 0) {
+      return res.json({
+        valido: false,
+        estado: 'expirado',
+        mensaje: 'La función ya terminó. Este tiquete ha expirado.',
+        tiquete
+      });
+    }
+
+    // Pasaron más de 10 min desde el inicio → expirado (no dejaron entrar a tiempo)
+    if (minDesdeInicio > 10) {
+      return res.json({
+        valido: false,
+        estado: 'expirado',
+        mensaje: 'El tiempo de acceso ha vencido. La función comenzó hace más de 10 minutos.',
+        tiquete
+      });
+    }
+
+    // ── Todo OK → marcar como usado y enviar email de entrada ────────────────
     await pool.query("UPDATE tiquetes SET estado='usado' WHERE codigo=$1", [codigo.toUpperCase()]);
-    res.json({ valido: true, estado: 'valido', mensaje: 'Acceso permitido ✓', tiquete: { ...tiquete, estado: 'usado' } });
+
+    // Obtener asientos para el email
+    const { rows: asientos } = await pool.query(`
+      SELECT a.fila, a.columna, a.numero
+      FROM detalle_tiquete dt
+      JOIN asientos a ON a.id = dt.asiento_id
+      WHERE dt.tiquete_id = $1
+    `, [tiquete.id]);
+
+    // Enviar email de confirmación de entrada (no bloqueante)
+    if (tiquete.usuario_email) {
+      enviarConfirmacionEntrada({
+        email: tiquete.usuario_email,
+        nombre: tiquete.usuario_nombre || 'Cinéfilo',
+        tiquete: { ...tiquete, estado: 'usado', asientos }
+      }).catch(err => console.error('❌ Error enviando email de entrada:', err.message));
+    }
+
+    res.json({
+      valido: true,
+      estado: 'valido',
+      mensaje: '¡Acceso permitido! Disfruta la película.',
+      tiquete: { ...tiquete, estado: 'usado', asientos }
+    });
 
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al validar tiquete', error: err.message });
@@ -243,20 +302,14 @@ export const listarMios = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DASHBOARD — con ingresos por sala agregados
-// ─────────────────────────────────────────────────────────────────────────────
 export const dashboard = async (req, res) => {
   try {
     const [ventas, ocupacion, populares, ingresosSalas] = await Promise.all([
-      // Ventas últimos 7 días
       pool.query(`
         SELECT DATE(fecha_compra) as dia, COUNT(*) as cantidad, SUM(total) as total
         FROM tiquetes WHERE estado != 'cancelado' AND codigo NOT LIKE 'PEND-%'
         GROUP BY dia ORDER BY dia DESC LIMIT 7
       `),
-
-      // Ocupación de funciones próximas
       pool.query(`
         SELECT f.id, p.titulo, f.fecha, f.hora,
           s.nombre as sala,
@@ -271,8 +324,6 @@ export const dashboard = async (req, res) => {
         GROUP BY f.id, p.titulo, f.fecha, f.hora, s.nombre, s.capacidad_total
         ORDER BY f.fecha ASC LIMIT 5
       `),
-
-      // Películas más populares por ingresos
       pool.query(`
         SELECT p.titulo, COUNT(t.id) as ventas, SUM(t.total) as ingresos
         FROM tiquetes t
@@ -281,10 +332,8 @@ export const dashboard = async (req, res) => {
         WHERE t.estado != 'cancelado' AND t.codigo NOT LIKE 'PEND-%'
         GROUP BY p.titulo ORDER BY ingresos DESC LIMIT 5
       `),
-
-      // ── NUEVO: Ingresos por sala ──────────────────────────────────────────
       pool.query(`
-        SELECT 
+        SELECT
           COALESCE(s.nombre, 'Sin sala') as sala,
           COUNT(DISTINCT t.id) as tiquetes,
           SUM(t.total) as ingresos,
@@ -301,7 +350,7 @@ export const dashboard = async (req, res) => {
       ventas_recientes: ventas.rows,
       ocupacion_funciones: ocupacion.rows,
       peliculas_populares: populares.rows,
-      ingresos_salas: ingresosSalas.rows   // ← nuevo campo
+      ingresos_salas: ingresosSalas.rows
     });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener dashboard', error: err.message });

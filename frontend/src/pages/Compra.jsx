@@ -22,7 +22,7 @@ export default function Compra() {
     Promise.all([
       api.get(`/funciones`).catch(() => ({ data: [] })),
       api.get(`/funciones/${funcionId}/asientos`)
-    ]).then(([_, a]) => setAsientos(a.data))
+    ]).then(([, a]) => setAsientos(a.data))
       .catch(console.error)
       .finally(() => setCargando(false));
 

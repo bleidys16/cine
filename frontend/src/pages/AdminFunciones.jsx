@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Plus, Pencil, X, Check, Calendar, Clock, Filter, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, X, Check, Calendar, Clock, Filter, ChevronDown, Search } from 'lucide-react';
 import api from '../services/api';
 import { formatFecha } from '../utils/fecha.js';
 import styles from './AdminPeliculas.module.css';
@@ -53,7 +53,7 @@ export default function AdminFunciones() {
     return funciones.filter(f => {
       if (filtroEstado !== 'Todos' && f.estado !== filtroEstado) return false;
       if (filtroSala && String(f.sala_id) !== filtroSala) return false;
-      if (filtroPelicula && String(f.pelicula_id) !== filtroPelicula) return false;
+      if (filtroPelicula && !f.titulo?.toLowerCase().includes(filtroPelicula.toLowerCase())) return false;
       if (filtroFecha && f.fecha?.slice(0, 10) !== filtroFecha) return false;
       if (filtroHora && f.hora?.slice(0, 5) !== filtroHora) return false;
       return true;
@@ -143,15 +143,18 @@ export default function AdminFunciones() {
             </div>
           </div>
 
-          {/* Película */}
+          {/* Película (Buscador) */}
           <div className={filterStyles.filtroItem}>
             <label className={filterStyles.filtroLabel}>Película</label>
             <div className={filterStyles.selectWrap}>
-              <select className="input" value={filtroPelicula} onChange={e => setFiltroPelicula(e.target.value)}>
-                <option value="">Todas las películas</option>
-                {peliculas.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
-              </select>
-              <ChevronDown size={13} className={filterStyles.selectIcon} />
+              <input 
+                className="input" 
+                placeholder="Buscar película..." 
+                value={filtroPelicula} 
+                onChange={e => setFiltroPelicula(e.target.value)} 
+                style={{ paddingRight: '32px' }}
+              />
+              <Search size={14} className={filterStyles.selectIcon} />
             </div>
           </div>
 

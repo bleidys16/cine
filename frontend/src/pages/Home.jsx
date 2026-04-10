@@ -1,16 +1,25 @@
 import { useEffect, useState, useRef } from 'react';
 import { Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import PeliculaCard from '../components/PeliculaCard';
 import HeroPosterGrid from '../components/HeroPosterGrid';
+import { useAuth } from '../context/AuthContext';
 import styles from './Home.module.css';
 
 const GENEROS = ['Todos', 'Acción', 'Drama', 'Ciencia Ficción', 'Comedia', 'Terror', 'Musical', 'Romance', 'Animación'];
 
 export default function Home() {
+  const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [peliculas, setPeliculas] = useState([]);
   const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    if (usuario?.rol === 'admin') {
+      navigate('/admin');
+    }
+  }, [usuario, navigate]);
   const [busqueda, setBusqueda] = useState('');
   const [genero, setGenero] = useState('Todos');
   const [mostrarAutocomplete, setMostrarAutocomplete] = useState(false);

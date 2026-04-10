@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import DetallePelicula from './pages/DetallePelicula';
 import Compra from './pages/Compra';
 import { Login, Registro } from './pages/Auth';
-import MisTiquetes from './pages/MisTiquetes';
+import Perfil from './pages/Perfil';
 import Preventa from './pages/Preventa';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
@@ -14,6 +14,8 @@ import AdminPeliculas from './pages/AdminPeliculas';
 import AdminFunciones from './pages/AdminFunciones';
 import AdminValidador from './pages/AdminValidador';
 import AdminSalas from './pages/AdminSalas';
+import { useState } from 'react';
+import SplashScreen from './components/SplashScreen';
 
 function ProtectedRoute({ children }) {
   const { usuario } = useAuth();
@@ -31,7 +33,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/comprar/:funcionId" element={<ProtectedRoute><Compra /></ProtectedRoute>} />
-        <Route path="/mis-tiquetes" element={<ProtectedRoute><MisTiquetes /></ProtectedRoute>} />
+        <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="pendientes" element={<AdminPendientes />} />
@@ -47,9 +49,12 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [splash, setSplash] = useState(true);
+
   return (
     <BrowserRouter>
       <AuthProvider>
+        {splash && <SplashScreen onDone={() => setSplash(false)} />}
         <AppRoutes />
       </AuthProvider>
     </BrowserRouter>

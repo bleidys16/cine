@@ -282,15 +282,16 @@ export const validar = async (req, res) => {
 export const listarMios = async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT t.*, p.titulo, f.fecha, f.hora,
+      SELECT t.*, p.titulo, f.fecha, f.hora, s.nombre AS sala,
         json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos
       FROM tiquetes t
       JOIN funciones f ON f.id = t.funcion_id
       JOIN peliculas p ON p.id = f.pelicula_id
+      LEFT JOIN salas s ON s.id = f.sala_id
       JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
       JOIN asientos a ON a.id = dt.asiento_id
       WHERE t.usuario_id = $1
-      GROUP BY t.id, p.titulo, f.fecha, f.hora
+      GROUP BY t.id, p.titulo, f.fecha, f.hora, s.nombre
       ORDER BY t.fecha_compra DESC
     `, [req.usuario.id]);
     res.json(rows.map(t => {
@@ -299,6 +300,90 @@ export const listarMios = async (req, res) => {
     }));
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener tiquetes', error: err.message });
+  }
+};
+
+export const obtenerPerfilCliente = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id;
+
+    const { rows: usuarioRows } = await pool.query(
+      'SELECT id, nombre, email FROM usuarios WHERE id = $1',
+      [usuarioId]
+    );
+
+    if (usuarioRows.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    const { rows: tiquetesRows } = await pool.query(`
+      SELECT
+        t.id,
+        t.codigo,
+        t.total,
+        t.estado AS estado_original,
+        t.fecha_compra,
+        p.titulo,
+        f.fecha,
+        f.hora,
+        s.nombre AS sala,
+        CASE
+          WHEN t.codigo LIKE 'PEND-%' THEN 'pendiente'
+          WHEN t.estado IN ('cancelado', 'usado') THEN 'expirado'
+          WHEN (f.fecha::date + f.hora::time + (p.duracion || ' minutes')::interval) < NOW() THEN 'expirado'
+          ELSE 'activo'
+        END AS estado,
+        json_agg(json_build_object('fila', a.fila, 'columna', a.columna, 'numero', a.numero)) AS asientos
+      FROM tiquetes t
+      JOIN funciones f ON f.id = t.funcion_id
+      JOIN peliculas p ON p.id = f.pelicula_id
+      LEFT JOIN salas s ON s.id = f.sala_id
+      JOIN detalle_tiquete dt ON dt.tiquete_id = t.id
+      JOIN asientos a ON a.id = dt.asiento_id
+      WHERE t.usuario_id = $1
+      GROUP BY t.id, p.titulo, f.fecha, f.hora, s.nombre, p.duracion
+      ORDER BY t.fecha_compra DESC
+    `, [usuarioId]);
+
+    res.json({ usuario: usuarioRows[0], tiquetes: tiquetesRows });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al obtener perfil del cliente', error: err.message });
+  }
+};
+
+export const limpiarHistorialCliente = async (req, res) => {
+  const usuarioId = req.usuario.id;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const { rows: idsRows } = await client.query(
+      'SELECT id FROM tiquetes WHERE usuario_id = $1',
+      [usuarioId]
+    );
+
+    const ids = idsRows.map((row) => row.id);
+
+    if (ids.length === 0) {
+      await client.query('COMMIT');
+      return res.json({ mensaje: 'No hay tiquetes para eliminar', eliminados: 0 });
+    }
+
+    await client.query(
+      'DELETE FROM asientos_funcion WHERE tiquete_id = ANY($1::int[])',
+      [ids]
+    );
+
+    await client.query('DELETE FROM tiquetes WHERE id = ANY($1::int[])', [ids]);
+
+    await client.query('COMMIT');
+    res.json({ mensaje: 'Historial eliminado exitosamente', eliminados: ids.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ mensaje: 'Error al limpiar historial', error: err.message });
+  } finally {
+    client.release();
   }
 };
 
@@ -354,5 +439,22 @@ export const dashboard = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener dashboard', error: err.message });
+  }
+};
+
+export const resetDashboard = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM asientos_funcion');
+    await client.query('DELETE FROM detalle_tiquete');
+    await client.query('DELETE FROM tiquetes');
+    await client.query('COMMIT');
+    res.json({ mensaje: 'Estadísticas y tiquetes reiniciados exitosamente' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ mensaje: 'Error al reiniciar dashboard', error: err.message });
+  } finally {
+    client.release();
   }
 };

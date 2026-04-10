@@ -1,19 +1,41 @@
 import { formatFecha } from '../utils/fecha.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TrendingUp, Users, Film, Ticket, BarChart2, Percent, DoorOpen, Trophy } from 'lucide-react';
 import api from '../services/api';
 import styles from './AdminDashboard.module.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [cargando, setCargando] = useState(true);
+  const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchDashboard = () => {
+    setCargando(true);
     api.get('/tiquetes/dashboard')
       .then(r => setData(r.data))
       .catch(console.error)
       .finally(() => setCargando(false));
+  };
+
+  useEffect(() => {
+    fetchDashboard();
   }, []);
+
+  const handleReset = () => {
+    if (!window.confirm('¿Estás seguro de reiniciar todas las estadísticas? Esto eliminará todos los tiquetes y reservas permanentes.')) return;
+    api.delete('/tiquetes/reset-stats')
+      .then(() => {
+        alert('Datos reiniciados correctamente');
+        fetchDashboard();
+      })
+      .catch(err => alert('Error al reiniciar: ' + (err.response?.data?.mensaje || err.message)));
+  };
+
+  const peliculasActivas = useMemo(() => {
+    const setTitulos = new Set((data?.ocupacion_funciones || []).map((f) => f.titulo));
+    return Array.from(setTitulos);
+  }, [data]);
 
   if (cargando) return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
@@ -29,20 +51,24 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.wrap}>
-      <h2 className={styles.secTitle}>Resumen general</h2>
+      <div className={styles.dashboardHeader}>
+        <h2 className={styles.secTitle}>Resumen general</h2>
+        <button className="btn btn-outline" onClick={handleReset} style={{ fontSize: '0.8rem', padding: '6px 12px' }}>
+          Reiniciar Estadísticas
+        </button>
+      </div>
 
-      {/* ── Stats Cards ─────────────────────────────────────────────────── */}
       <div className={styles.statsGrid}>
-        <StatCard icon={<TrendingUp size={20} />} label="Ingresos (7 días)" value={`$${totalVentas.toLocaleString('es-CO')}`} color="gold" />
-        <StatCard icon={<Ticket size={20} />} label="Tiquetes vendidos" value={totalTiquetes} color="blue" />
-        <StatCard icon={<Film size={20} />} label="Películas activas" value={data?.peliculas_populares?.length || 0} color="purple" />
-        <StatCard icon={<Users size={20} />} label="Funciones próximas" value={data?.ocupacion_funciones?.length || 0} color="green" />
+        <StatCard icon={<TrendingUp size={20} />} label="Ingresos (7 días)" value={`$${totalVentas.toLocaleString('es-CO')}`} color="gold" onClick={() => document.getElementById('ventas-dia')?.scrollIntoView({ behavior: 'smooth' })} />
+        <StatCard icon={<Ticket size={20} />} label="Tiquetes vendidos" value={totalTiquetes} color="blue" onClick={() => navigate('/admin/pendientes')} />
+        <StatCard icon={<Film size={20} />} label="Películas activas" value={peliculasActivas.length} color="purple" onClick={() => navigate('/admin/peliculas')} />
+        <StatCard icon={<Users size={20} />} label="Funciones próximas" value={data?.ocupacion_funciones?.length || 0} color="green" onClick={() => navigate('/admin/funciones')} />
       </div>
 
       {/* ── Ventas + Ocupación ───────────────────────────────────────────── */}
       <div className={styles.grid2}>
         {/* Ventas por día */}
-        <div className={`card ${styles.tableCard}`}>
+        <div id="ventas-dia" className={`card ${styles.tableCard}`}>
           <div className={styles.cardHeader}>
             <BarChart2 size={16} />
             <h3>Ventas por día</h3>
@@ -173,9 +199,9 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ icon, label, value, color }) {
+function StatCard({ icon, label, value, color, onClick }) {
   return (
-    <div className={`card ${styles.statCard} ${styles[`stat_${color}`]}`}>
+    <div className={`card ${styles.statCard} ${styles[`stat_${color}`]}`} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className={styles.statIcon}>{icon}</div>
       <div>
         <p className={styles.statLabel}>{label}</p>

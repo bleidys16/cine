@@ -203,8 +203,8 @@ function TiqueteConfirmado({ tiquete, navigate }) {
 
           {/* Acciones */}
           <div className={styles.tiqueteActions}>
-            <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => navigate('/mis-tiquetes')}>
-              Mis tiquetes
+            <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => navigate('/perfil')}>
+              Mi cuenta
             </button>
             <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => navigate('/')}>
               Ver cartelera

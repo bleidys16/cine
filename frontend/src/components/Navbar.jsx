@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Film, Ticket, LogIn, LogOut, LayoutDashboard, Menu, X, Star } from 'lucide-react';
+import { Film, UserRound, LogIn, LogOut, LayoutDashboard, Menu, X, Star } from 'lucide-react';
 import { useState } from 'react';
 import styles from './Navbar.module.css';
 
@@ -29,8 +29,8 @@ export default function Navbar() {
             <Star size={13} /> Preventa
           </Link>
           {usuario && usuario.rol !== 'admin' && (
-            <Link to="/mis-tiquetes" className={`${styles.link} ${isActive('/mis-tiquetes') ? styles.active : ''}`} onClick={() => setMenuOpen(false)}>
-              <Ticket size={14} /> Mis Tiquetes
+            <Link to="/perfil" className={`${styles.link} ${isActive('/perfil') ? styles.active : ''}`} onClick={() => setMenuOpen(false)}>
+              <UserRound size={14} /> Mi Cuenta
             </Link>
           )}
           {usuario?.rol === 'admin' && (
@@ -41,10 +41,6 @@ export default function Navbar() {
           <div className={styles.authArea}>
             {usuario ? (
               <div className={styles.userMenu}>
-                <div className={styles.userInfo}>
-                  <div className={styles.avatar}>{usuario.nombre[0].toUpperCase()}</div>
-                  <span className={styles.userName}>{usuario.nombre.split(' ')[0]}</span>
-                </div>
                 <button className="btn btn-ghost" onClick={handleLogout} style={{ padding: '7px 12px', fontSize: '0.82rem' }}>
                   <LogOut size={14} /> Salir
                 </button>

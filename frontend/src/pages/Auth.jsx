@@ -22,8 +22,10 @@ export function Login() {
     e.preventDefault();
     setError('');
     const res = await login(form.email, form.contrasena);
-    if (res.ok) navigate('/');
-    else setError(res.mensaje);
+    if (res.ok) {
+      const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+      navigate(usuario?.rol === 'admin' ? '/admin' : '/');
+    } else setError(res.mensaje);
   };
 
   return (

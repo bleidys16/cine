@@ -1,0 +1,221 @@
+.main {
+  min-height: calc(100vh - 60px);
+  padding: 92px 0 34px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(212, 168, 67, 0.08), transparent 38%),
+    radial-gradient(circle at 92% 10%, rgba(255, 255, 255, 0.06), transparent 30%),
+    var(--bg-base);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.profileCard,
+.ticketsCard {
+  background: rgba(17, 17, 17, 0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.profileCard {
+  padding: 18px;
+  position: sticky;
+  top: 78px;
+}
+
+.profileHeader h1 {
+  font-size: 1.2rem;
+}
+
+.profileHeader p {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  margin-top: 5px;
+}
+
+.profileFields {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.fieldCard {
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  display: grid;
+  gap: 7px;
+}
+
+.fieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.fieldCard strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.ticketsCard {
+  padding: 16px;
+}
+
+.ticketsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ticketsActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clearBtn {
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clearBtn :global(.spinner) {
+  width: 13px;
+  height: 13px;
+}
+
+.ticketsHeader h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.ticketList {
+  display: grid;
+  gap: 10px;
+}
+
+.ticketItem {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+  display: grid;
+  gap: 10px;
+}
+
+.ticketTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticketTop h3 {
+  font-size: 0.95rem;
+}
+
+.ticketMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.ticketMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seatsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.seatTag {
+  padding: 3px 8px;
+  border-radius: 100px;
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  background: rgba(212, 168, 67, 0.08);
+  color: var(--gold-light);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.emptyState {
+  min-height: 240px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  padding: 18px;
+}
+
+.emptyState h3 {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.emptyState p {
+  font-size: 0.84rem;
+}
+
+.loaderWrap {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profileCard {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding-top: 82px;
+  }
+
+  .ticketsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .ticketsActions {
+    justify-content: space-between;
+  }
+
+  .profileCard,
+  .ticketsCard {
+    padding: 14px;
+  }
+}
